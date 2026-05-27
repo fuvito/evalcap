@@ -1,4 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { logger } from './logger'
+
+if (!process.env.ANTHROPIC_API_KEY) {
+  logger.error('ANTHROPIC_API_KEY is not set — all Claude calls will fail', undefined, 'claude')
+}
 
 // Server-side only — API key never exposed to client
 const anthropic = new Anthropic({
@@ -12,23 +17,21 @@ export interface JournalEntry {
   prompt_used?: string | null
 }
 
-/**
- * Generate smart follow-up prompts based on previous journal entries.
- * The AI reads past entries and asks contextual, personalized questions.
- */
 export async function generateSmartPrompts(
   previousEntries: JournalEntry[],
   checkInType: 'daily' | 'weekly'
 ): Promise<string[]> {
   const context = previousEntries
-    .slice(-5) // Last 5 entries for context
+    .slice(-5)
     .map(e => `[${e.created_at}]: ${e.content}`)
     .join('\n')
 
+  logger.info(`Generating ${checkInType} prompts`, { entryCount: previousEntries.length }, 'claude')
+
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1000,
-    system: `You are a helpful assistant that generates smart, personalized journal prompts for performance tracking. 
+    system: `You are a helpful assistant that generates smart, personalized journal prompts for performance tracking.
 Your goal is to help individual contributors capture their achievements, progress, and plans.
 Generate prompts that are:
 - Specific and follow up on previous entries when relevant
@@ -44,12 +47,15 @@ Return exactly 3 prompts as a JSON array of strings. No other text.`,
     ],
   })
 
+  logger.debug('Prompts response received', undefined, 'claude')
+
   const text = message.content[0].type === 'text' ? message.content[0].text : '[]'
 
   try {
     const clean = text.replace(/```json|```/g, '').trim()
     return JSON.parse(clean)
   } catch {
+    logger.warn('Failed to parse Claude prompts JSON, using fallback', { text }, 'claude')
     return [
       'What did you accomplish since your last check-in?',
       'What are you currently working on?',
@@ -58,10 +64,6 @@ Return exactly 3 prompts as a JSON array of strings. No other text.`,
   }
 }
 
-/**
- * Generate a performance review summary from journal entries.
- * Compiles and rewrites clearly — no exaggeration, honest and grounded.
- */
 export async function generateSummary(
   entries: JournalEntry[],
   timeframe: string,
@@ -71,8 +73,10 @@ export async function generateSummary(
     .map(e => `[${e.created_at}]: ${e.content}`)
     .join('\n\n')
 
+  logger.info('Generating performance summary', { entryCount: entries.length, timeframe }, 'claude')
+
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1500,
     system: `You are a professional writing assistant helping individual contributors prepare for performance reviews.
 Your job is to compile and rewrite their journal entries into a clear, honest performance summary.
@@ -95,6 +99,8 @@ ${journalContent}`,
       },
     ],
   })
+
+  logger.debug('Summary response received', undefined, 'claude')
 
   return message.content[0].type === 'text'
     ? message.content[0].text

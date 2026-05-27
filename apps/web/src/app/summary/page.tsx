@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Nav } from '@/components/nav'
 
 export default function SummaryPage() {
   const router = useRouter()
@@ -42,6 +43,8 @@ export default function SummaryPage() {
   }
 
   return (
+    <>
+      <Nav />
     <div className="max-w-2xl mx-auto p-8 space-y-6">
       <h1 className="text-2xl font-bold text-brand-700">Generate Summary</h1>
       <p className="text-gray-500 text-sm">
@@ -131,5 +134,6 @@ export default function SummaryPage() {
         </div>
       )}
     </div>
+    </>
   )
 }

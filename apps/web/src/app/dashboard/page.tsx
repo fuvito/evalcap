@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Nav } from '@/components/nav'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -25,6 +26,8 @@ export default async function DashboardPage() {
     .limit(3)
 
   return (
+    <>
+      <Nav />
     <div className="max-w-4xl mx-auto p-8 space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-brand-700">Dashboard</h1>
@@ -110,5 +113,6 @@ export default async function DashboardPage() {
         </Link>
       </section>
     </div>
+    </>
   )
 }

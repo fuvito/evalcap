@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { Nav } from '@/components/nav'
+import { logger } from '@/lib/logger'
 
 export default function CheckInPage() {
   const router = useRouter()
@@ -19,6 +21,12 @@ export default function CheckInPage() {
     loadPrompts()
   }, [checkInType])
 
+  const FALLBACK_PROMPTS = [
+    'What did you accomplish since your last check-in?',
+    'What are you currently working on?',
+    'Any blockers or upcoming plans to note?',
+  ]
+
   async function loadPrompts() {
     setLoadingPrompts(true)
     try {
@@ -28,14 +36,16 @@ export default function CheckInPage() {
         body: JSON.stringify({ checkInType }),
       })
       const data = await res.json()
-      setPrompts(data.prompts || [])
+      if (!res.ok) {
+        logger.error('/api/prompts returned error', data.detail ?? data.error, 'checkin')
+        setPrompts(FALLBACK_PROMPTS)
+      } else {
+        setPrompts(data.prompts || FALLBACK_PROMPTS)
+      }
       setResponses({})
-    } catch {
-      setPrompts([
-        'What did you accomplish since your last check-in?',
-        'What are you currently working on?',
-        'Any blockers or upcoming plans to note?',
-      ])
+    } catch (err) {
+      logger.error('/api/prompts fetch failed', err, 'checkin')
+      setPrompts(FALLBACK_PROMPTS)
     } finally {
       setLoadingPrompts(false)
     }
@@ -63,7 +73,7 @@ export default function CheckInPage() {
 
       router.push('/dashboard')
     } catch (err) {
-      console.error('Save failed:', err)
+      logger.error('Save check-in failed', err, 'checkin')
     } finally {
       setSaving(false)
     }
@@ -72,6 +82,8 @@ export default function CheckInPage() {
   const hasResponses = Object.values(responses).some(r => r.trim().length > 0)
 
   return (
+    <>
+      <Nav />
     <div className="max-w-2xl mx-auto p-8 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-brand-700">New Check-in</h1>
@@ -134,5 +146,6 @@ export default function CheckInPage() {
         </button>
       </div>
     </div>
+    </>
   )
 }

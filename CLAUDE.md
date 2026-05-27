@@ -13,7 +13,7 @@ Users do smart daily/weekly check-ins and generate AI-powered performance review
 ## Tech Stack
 - **Framework**: Next.js 15 with App Router
 - **Database + Auth**: Supabase (PostgreSQL + Row Level Security)
-- **AI**: Anthropic Claude API (`claude-sonnet-4-20250514`)
+- **AI**: Anthropic Claude API (`claude-sonnet-4-6`)
 - **Styling**: Tailwind CSS
 - **Language**: TypeScript (strict mode)
 - **Deployment**: Vercel
