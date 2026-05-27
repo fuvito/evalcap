@@ -1,0 +1,135 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function SummaryPage() {
+  const router = useRouter()
+  const [timeframeStart, setTimeframeStart] = useState('')
+  const [timeframeEnd, setTimeframeEnd] = useState('')
+  const [userInstructions, setUserInstructions] = useState('')
+  const [summary, setSummary] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleGenerate() {
+    if (!timeframeStart || !timeframeEnd) return
+
+    setLoading(true)
+    setError('')
+    setSummary('')
+
+    try {
+      const res = await fetch('/api/summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timeframeStart, timeframeEnd, userInstructions }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Failed to generate summary')
+        return
+      }
+
+      setSummary(data.summary)
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto p-8 space-y-6">
+      <h1 className="text-2xl font-bold text-brand-700">Generate Summary</h1>
+      <p className="text-gray-500 text-sm">
+        Select a timeframe and EvalCap will compile your journal entries into a
+        polished, honest performance review summary.
+      </p>
+
+      {/* Timeframe selection */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            From
+          </label>
+          <input
+            type="date"
+            value={timeframeStart}
+            onChange={e => setTimeframeStart(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            To
+          </label>
+          <input
+            type="date"
+            value={timeframeEnd}
+            onChange={e => setTimeframeEnd(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          />
+        </div>
+      </div>
+
+      {/* Optional instructions */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Additional instructions (optional)
+        </label>
+        <textarea
+          value={userInstructions}
+          onChange={e => setUserInstructions(e.target.value)}
+          placeholder="E.g. Focus more on the Q2 product launch. Include leadership contributions."
+          rows={3}
+          className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+        />
+      </div>
+
+      <button
+        onClick={handleGenerate}
+        disabled={!timeframeStart || !timeframeEnd || loading}
+        className="w-full py-3 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        {loading ? 'Generating...' : 'Generate Summary'}
+      </button>
+
+      {error && (
+        <p className="text-red-500 text-sm">{error}</p>
+      )}
+
+      {/* Summary output */}
+      {summary && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Your Summary</h2>
+            <button
+              onClick={() => navigator.clipboard.writeText(summary)}
+              className="text-sm text-brand-500 hover:underline"
+            >
+              Copy to clipboard
+            </button>
+          </div>
+          <textarea
+            value={summary}
+            onChange={e => setSummary(e.target.value)}
+            rows={16}
+            className="w-full border border-gray-300 rounded-lg p-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none font-mono"
+          />
+          <p className="text-xs text-gray-400">
+            You can edit this summary directly above before using it.
+          </p>
+          <button
+            onClick={handleGenerate}
+            className="text-sm text-brand-500 hover:underline"
+          >
+            Regenerate with different instructions →
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
