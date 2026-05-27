@@ -29,6 +29,13 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
-/apps/web/test-results/error-handling-Error-Handl-87d43-puts-have-proper-attributes-chromium/error-context.md
-/apps/web/test-results/error-handling-Error-Handl-87d43-puts-have-proper-attributes-chromium/test-failed-1.png
-/apps/web/test-results/.last-run.json
+
+# Test outputs and reports
+/apps/web/test-results/
+/apps/web/playwright-report/
+/apps/web/.nyc_output/
+/apps/web/coverage/
+**/test-results/
+**/playwright-report/
+**/.nyc_output/
+**/coverage/
