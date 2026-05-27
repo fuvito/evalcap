@@ -29,7 +29,7 @@ export async function generateSmartPrompts(
   logger.info(`Generating ${checkInType} prompts`, { entryCount: previousEntries.length }, 'claude')
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 1000,
     system: `You are a helpful assistant that generates smart, personalized journal prompts for performance tracking.
 Your goal is to help individual contributors capture their achievements, progress, and plans.
@@ -76,7 +76,7 @@ export async function generateSummary(
   logger.info('Generating performance summary', { entryCount: entries.length, timeframe }, 'claude')
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 1500,
     system: `You are a professional writing assistant helping individual contributors prepare for performance reviews.
 Your job is to compile and rewrite their journal entries into a clear, honest performance summary.
