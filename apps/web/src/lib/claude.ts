@@ -9,7 +9,7 @@ export interface JournalEntry {
   id: string
   content: string
   created_at: string
-  prompt_used?: string
+  prompt_used?: string | null
 }
 
 /**

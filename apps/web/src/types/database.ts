@@ -24,6 +24,7 @@ export type Database = {
           full_name?: string | null
           role?: string | null
         }
+        Relationships: []
       }
       journal_entries: {
         Row: {
@@ -44,6 +45,7 @@ export type Database = {
         Update: {
           content?: string
         }
+        Relationships: []
       }
       summaries: {
         Row: {
@@ -67,7 +69,20 @@ export type Database = {
           content?: string
           user_instructions?: string | null
         }
+        Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
