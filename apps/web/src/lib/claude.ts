@@ -21,9 +21,14 @@ export async function generateSmartPrompts(
   previousEntries: JournalEntry[],
   checkInType: 'daily' | 'weekly'
 ): Promise<string[]> {
+  // Sanitize entries to prevent prompt injection
   const context = previousEntries
     .slice(-5)
-    .map(e => `[${e.created_at}]: ${e.content}`)
+    .map(e => {
+      // Truncate entries to prevent token exhaustion
+      const truncatedContent = e.content.substring(0, 1000)
+      return `[${e.created_at}]: ${truncatedContent}`
+    })
     .join('\n')
 
   logger.info(`Generating ${checkInType} prompts`, { entryCount: previousEntries.length }, 'claude')
@@ -69,9 +74,17 @@ export async function generateSummary(
   timeframe: string,
   userInstructions?: string
 ): Promise<string> {
+  // Sanitize entries to prevent prompt injection and token exhaustion
   const journalContent = entries
-    .map(e => `[${e.created_at}]: ${e.content}`)
+    .map(e => {
+      // Truncate entries to prevent token exhaustion
+      const truncatedContent = e.content.substring(0, 2000)
+      return `[${e.created_at}]: ${truncatedContent}`
+    })
     .join('\n\n')
+
+  // Sanitize user instructions
+  const sanitizedInstructions = userInstructions ? userInstructions.substring(0, 500) : undefined
 
   logger.info('Generating performance summary', { entryCount: entries.length, timeframe }, 'claude')
 
@@ -94,7 +107,7 @@ CRITICAL RULES:
         role: 'user',
         content: `Create a performance review summary for the timeframe: ${timeframe}
 
-${userInstructions ? `Additional instructions: ${userInstructions}\n\n` : ''}Journal entries:
+${sanitizedInstructions ? `Additional instructions: ${sanitizedInstructions}\n\n` : ''}Journal entries:
 ${journalContent}`,
       },
     ],

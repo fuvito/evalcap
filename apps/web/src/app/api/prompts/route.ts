@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateSmartPrompts } from '@/lib/claude'
 import { logger } from '@/lib/logger'
+import { validateCheckInType, ValidationException, logValidationError } from '@/lib/validation'
+import { checkRateLimit, getRateLimitInfo, type RateLimitConfig } from '@/lib/rate-limit'
+
+const PROMPTS_RATE_LIMIT: RateLimitConfig = {
+  maxRequests: 10,
+  windowMs: 60 * 1000, // 1 minute
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,8 +20,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { checkInType } = await request.json()
-    logger.info('POST /api/prompts', { userId: user.id, checkInType }, 'api')
+    // Check rate limit
+    if (!checkRateLimit(user.id, PROMPTS_RATE_LIMIT)) {
+      const rateInfo = getRateLimitInfo(user.id, PROMPTS_RATE_LIMIT)
+      logger.warn('Rate limit exceeded for /api/prompts', { userId: user.id }, 'api')
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded',
+          message: `Too many requests. Please try again after ${rateInfo.resetAt.toISOString()}`,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateInfo.resetAt.getTime() - Date.now()) / 1000).toString(),
+          },
+        }
+      )
+    }
+
+    const body = await request.json()
+    const { checkInType } = body
+
+    // Validate checkInType
+    let validatedCheckInType: 'daily' | 'weekly'
+    try {
+      validatedCheckInType = validateCheckInType(checkInType)
+    } catch (err) {
+      if (err instanceof ValidationException) {
+        logValidationError(err.errors, 'POST /api/prompts')
+        return NextResponse.json(
+          { error: 'Invalid request', details: err.errors },
+          { status: 400 }
+        )
+      }
+      throw err
+    }
+
+    logger.info('POST /api/prompts', { userId: user.id, checkInType: validatedCheckInType }, 'api')
 
     const { data: entries, error } = await supabase
       .from('journal_entries')
@@ -30,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     logger.debug('Fetched recent entries', { count: entries?.length ?? 0 }, 'api')
 
-    const prompts = await generateSmartPrompts(entries || [], checkInType || 'weekly')
+    const prompts = await generateSmartPrompts(entries || [], validatedCheckInType)
 
     logger.info('Prompts generated successfully', { count: prompts.length }, 'api')
     return NextResponse.json({ prompts })

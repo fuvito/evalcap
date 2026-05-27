@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateSummary } from '@/lib/claude'
 import { logger } from '@/lib/logger'
+import { validateDateString, validateOptionalString, ValidationException, logValidationError } from '@/lib/validation'
+import { checkRateLimit, getRateLimitInfo, type RateLimitConfig } from '@/lib/rate-limit'
+
+const SUMMARY_RATE_LIMIT: RateLimitConfig = {
+  maxRequests: 5,
+  windowMs: 60 * 1000, // 1 minute
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,19 +20,64 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { timeframeStart, timeframeEnd, userInstructions } = await request.json()
-    logger.info('POST /api/summary', { userId: user.id, timeframeStart, timeframeEnd }, 'api')
-
-    if (!timeframeStart || !timeframeEnd) {
-      return NextResponse.json({ error: 'Timeframe is required' }, { status: 400 })
+    // Check rate limit (expensive operation)
+    if (!checkRateLimit(user.id, SUMMARY_RATE_LIMIT)) {
+      const rateInfo = getRateLimitInfo(user.id, SUMMARY_RATE_LIMIT)
+      logger.warn('Rate limit exceeded for /api/summary', { userId: user.id }, 'api')
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded',
+          message: `Too many summary requests. Please try again after ${rateInfo.resetAt.toISOString()}`,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateInfo.resetAt.getTime() - Date.now()) / 1000).toString(),
+          },
+        }
+      )
     }
+
+    const body = await request.json()
+    const { timeframeStart, timeframeEnd, userInstructions } = body
+
+    // Validate timeframe dates
+    let validatedStart: string
+    let validatedEnd: string
+    let validatedInstructions: string | null
+    try {
+      validatedStart = validateDateString(timeframeStart, 'timeframeStart')
+      validatedEnd = validateDateString(timeframeEnd, 'timeframeEnd')
+      validatedInstructions = validateOptionalString(userInstructions, 'userInstructions', 500)
+    } catch (err) {
+      if (err instanceof ValidationException) {
+        logValidationError(err.errors, 'POST /api/summary')
+        return NextResponse.json(
+          { error: 'Invalid request', details: err.errors },
+          { status: 400 }
+        )
+      }
+      throw err
+    }
+
+    // Validate date range
+    const start = new Date(validatedStart)
+    const end = new Date(validatedEnd)
+    if (start > end) {
+      return NextResponse.json(
+        { error: 'Invalid request', details: [{ field: 'timeframeStart', message: 'Start date must be before end date' }] },
+        { status: 400 }
+      )
+    }
+
+    logger.info('POST /api/summary', { userId: user.id, timeframeStart: validatedStart, timeframeEnd: validatedEnd }, 'api')
 
     const { data: entries, error } = await supabase
       .from('journal_entries')
       .select('id, content, created_at')
       .eq('user_id', user.id)
-      .gte('created_at', timeframeStart)
-      .lte('created_at', timeframeEnd)
+      .gte('created_at', validatedStart)
+      .lte('created_at', validatedEnd)
       .order('created_at', { ascending: true })
 
     if (error) {
@@ -42,17 +94,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const timeframe = `${timeframeStart} to ${timeframeEnd}`
-    const summary = await generateSummary(entries, timeframe, userInstructions)
+    const timeframe = `${validatedStart} to ${validatedEnd}`
+    const summary = await generateSummary(entries, timeframe, validatedInstructions || undefined)
 
     const { data: savedSummary, error: saveError } = await supabase
       .from('summaries')
       .insert({
         user_id: user.id,
         content: summary,
-        timeframe_start: timeframeStart,
-        timeframe_end: timeframeEnd,
-        user_instructions: userInstructions || null,
+        timeframe_start: validatedStart,
+        timeframe_end: validatedEnd,
+        user_instructions: validatedInstructions,
       })
       .select()
       .single()
