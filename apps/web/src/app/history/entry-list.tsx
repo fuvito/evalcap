@@ -1,17 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import {useState} from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { logger } from '@/lib/logger'
-import type { JournalEntry } from '@/types/database'
+import {logger} from '@/lib/logger'
+import type {JournalEntry} from '@/types/database'
+
+type EntryListItem = Pick<JournalEntry, 'id' | 'content' | 'check_in_type' | 'created_at'>
 
 interface EntryListProps {
-  entries: JournalEntry[]
+  entries: EntryListItem[]
 }
 
 export function EntryList({ entries: initialEntries }: EntryListProps) {
-  const router = useRouter()
   const [entries, setEntries] = useState(initialEntries)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [showConfirm, setShowConfirm] = useState<string | null>(null)
