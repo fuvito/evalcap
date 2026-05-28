@@ -114,35 +114,35 @@ MVP features (auth, checkin, history, summary, dashboard) appear complete. This 
 
 ## 🟠 P2: Medium Priority (Next Sprint, ~1-2 Weeks)
 
-### 13. Edit & Delete Check-Ins (IN PROGRESS)
-- [ ] Add `/history/[id]/edit` page (client component)
-- [ ] Wire up `PATCH /api/entries/[id]` endpoint (update content, preserve metadata)
-- [ ] Wire up `DELETE /api/entries/[id]` endpoint (hard delete for MVP, soft delete for future)
-- [ ] Add confirmation dialog before delete
-- [ ] Test RLS policies work for edit/delete (user can only edit/delete own entries)
-- [ ] Update history page to show edit link for each entry
-- [ ] Test: edit updates entry, delete removes from history
-- **Why**: Users need to fix typos or remove entries.
-- **Status**: Starting implementation
-- **Time Est**: 4 hours
+### 13. Edit & Delete Check-Ins ✅
+- [x] Add `/history/[id]/edit` page (client component)
+- [x] Wire up `PATCH /api/entries/[id]` endpoint (update content, preserve metadata)
+- [x] Wire up `DELETE /api/entries/[id]` endpoint (hard delete for MVP)
+- [x] Add GET `/api/entries/[id]` endpoint (fetch single entry)
+- [x] Add confirmation dialog before delete
+- [x] Test RLS policies work for edit/delete (user can only edit/delete own entries)
+- [x] Update history page to show edit/delete buttons (hover reveal)
+- **Status**: Complete — Edit/delete with inline confirmation and RLS protection
 
-### 14. Save & View Summaries
-- [ ] Create `summaries` table (if not exists) with: user_id, content, created_at, timeframe, user_instructions
-- [ ] Update types in `src/types/database.ts`
-- [ ] Wire `POST /api/summary` to save generated summary
-- [ ] Create `/summaries` page (list all saved summaries)
-- [ ] Create `/summaries/[id]` page (view single summary, allow edit/regenerate/copy)
-- [ ] Add copy-to-clipboard button
-- **Why**: Core feature — users want to preserve summaries, not regenerate each time.
-- **Time Est**: 5 hours
+### 14. Save & View Summaries ✅
+- [x] Create `/summaries` page (list all saved summaries)
+- [x] Create `/summaries/[id]` page (view single summary)
+- [x] Add delete button with confirmation
+- [x] Add copy-to-clipboard button
+- [x] Add regenerate button to reuse timeframe
+- [x] Add Summaries link to navigation
+- [x] POST /api/summary already saves to database
+- [x] Types in database.ts (already done)
+- **Status**: Complete — Full summary management with view, delete, copy, regenerate
 
-### 15. Onboarding Flow
+### 15. Onboarding Flow (IN PROGRESS)
 - [ ] Detect first-time user (no entries, maybe a flag in profiles table)
 - [ ] Show onboarding carousel/modal on first login
 - [ ] Explain: what is EvalCap, how to use it, why journaling helps
 - [ ] Skip/done button
 - [ ] Don't show again after completion
 - **Why**: First-time UX — helps users understand the product.
+- **Status**: Starting implementation
 - **Time Est**: 3 hours
 
 ### 16. Check-In Type Preference (Settings)
