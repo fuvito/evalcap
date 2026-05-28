@@ -84,7 +84,7 @@ export default function ViewSummaryPage() {
     return (
       <>
         <Nav />
-        <div className="max-w-3xl mx-auto p-8">
+        <div className="max-w-3xl mx-auto px-4 md:px-8 py-8">
           <div className="space-y-4">
             <SkeletonText className="h-8 w-1/4" />
             <SkeletonText className="h-64 w-full" />
@@ -98,13 +98,13 @@ export default function ViewSummaryPage() {
     return (
       <>
         <Nav />
-        <div className="max-w-3xl mx-auto p-8 text-center">
-          <p className="text-red-500">{error || 'Summary not found'}</p>
+        <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 text-center">
+          <p className="text-red-500 dark:text-red-400">{error || 'Summary not found'}</p>
           <button
             onClick={() => router.push('/summaries')}
-            className="mt-4 text-brand-500 hover:underline"
+            className="mt-4 text-brand-500 dark:text-brand-400 hover:underline text-sm"
           >
-            Back to summaries
+            ← Back to summaries
           </button>
         </div>
       </>
@@ -114,66 +114,66 @@ export default function ViewSummaryPage() {
   return (
     <>
       <Nav />
-      <div className="max-w-3xl mx-auto p-8 space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-6">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-brand-700">Performance Summary</h1>
-            <p className="text-gray-600 text-sm mt-1">
-              {new Date(summary.timeframe_start).toLocaleDateString()} to{' '}
-              {new Date(summary.timeframe_end).toLocaleDateString()}
+            <button
+              onClick={() => router.push('/summaries')}
+              className="text-xs text-gray-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors mb-3 flex items-center gap-1"
+            >
+              ← Saved Summaries
+            </button>
+            <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Performance Summary</h1>
+            <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">
+              {new Date(summary.timeframe_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {' – '}
+              {new Date(summary.timeframe_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
           </div>
-          <button
-            onClick={() => router.push('/summaries')}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
-            title="Close"
-          >
-            ✕
-          </button>
         </div>
 
         {/* Summary content */}
-        <textarea
-          value={summary.content}
-          readOnly
-          rows={16}
-          className="w-full border border-gray-300 rounded-lg p-4 text-sm text-gray-900 focus:outline-none resize-none font-mono bg-white"
-        />
+        <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-sm">
+          <textarea
+            value={summary.content}
+            readOnly
+            rows={16}
+            className="w-full rounded-xl p-5 text-sm text-slate-700 dark:text-slate-200 focus:outline-none resize-none bg-transparent leading-relaxed"
+          />
+        </div>
 
         {/* Action buttons */}
         <div className="flex flex-wrap gap-2">
           <button
             onClick={handleCopy}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+            className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors"
           >
-            {copied ? '✓ Copied to clipboard' : '📋 Copy to clipboard'}
+            {copied ? '✓ Copied' : 'Copy to clipboard'}
           </button>
           <button
             onClick={() => {
-              // Store summary in session for editing
               sessionStorage.setItem('lastSummary', summary.content)
               router.push(
                 `/summary?from=${summary.timeframe_start}&to=${summary.timeframe_end}&instructions=${encodeURIComponent(summary.user_instructions || '')}`
               )
             }}
-            className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors"
+            className="px-4 py-2 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
           >
-            🔄 Regenerate
+            Regenerate
           </button>
           <button
             onClick={handleDelete}
             disabled={deleting}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 disabled:opacity-50 transition-colors"
+            className="px-4 py-2 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 transition-colors"
           >
-            {deleting ? 'Deleting...' : '🗑️ Delete'}
+            {deleting ? 'Deleting...' : 'Delete'}
           </button>
         </div>
 
         {/* Metadata */}
-        <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
-          Created {new Date(summary.created_at).toLocaleDateString()} at{' '}
-          {new Date(summary.created_at).toLocaleTimeString()}
-        </div>
+        <p className="text-xs text-gray-400 dark:text-slate-500">
+          Generated on {new Date(summary.created_at).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+        </p>
       </div>
     </>
   )

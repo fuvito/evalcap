@@ -83,7 +83,7 @@ export default function EditEntryPage() {
     return (
       <>
         <Nav />
-        <div className="max-w-3xl mx-auto p-8">
+        <div className="max-w-3xl mx-auto px-4 md:px-8 py-8">
           <div className="space-y-4">
             <SkeletonText className="h-8 w-1/4" />
             <SkeletonText className="h-64 w-full" />
@@ -97,13 +97,13 @@ export default function EditEntryPage() {
     return (
       <>
         <Nav />
-        <div className="max-w-3xl mx-auto p-8 text-center">
-          <p className="text-red-500">{error || 'Entry not found'}</p>
+        <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 text-center">
+          <p className="text-red-500 dark:text-red-400">{error || 'Entry not found'}</p>
           <button
             onClick={() => router.push('/history')}
-            className="mt-4 text-brand-500 hover:underline"
+            className="mt-4 text-brand-500 dark:text-brand-400 hover:underline text-sm"
           >
-            Back to history
+            ← Back to history
           </button>
         </div>
       </>
@@ -113,59 +113,62 @@ export default function EditEntryPage() {
   return (
     <>
       <Nav />
-      <div className="max-w-3xl mx-auto p-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-brand-700">Edit Entry</h1>
+      <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-6">
+        <div>
           <button
             onClick={() => router.push('/history')}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
-            title="Close"
+            className="text-xs text-gray-400 dark:text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors mb-3 flex items-center gap-1"
           >
-            ✕
+            ← All Check-ins
           </button>
+          <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Edit Entry</h1>
+          <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">
+            {new Date(entry.created_at).toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+            {' · '}
+            <span className="capitalize">{entry.check_in_type}</span>
+          </p>
         </div>
 
-        <div className="text-sm text-gray-500">
-          {new Date(entry.created_at).toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-          })}
-          {' '}· {entry.check_in_type}
-        </div>
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
+          </div>
+        )}
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-
-        <div className="space-y-4">
+        <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-sm p-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
               Entry Content
             </label>
             <textarea
               value={content}
               onChange={e => setContent(e.target.value)}
               rows={12}
-              className="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+              className="w-full border border-gray-200 dark:border-slate-600 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-200 bg-gray-50 dark:bg-slate-700 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-slate-600 transition-colors resize-none"
               placeholder="Your check-in content..."
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
               {content.length} / 10,000 characters
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-2">
             <button
               onClick={handleSave}
               disabled={saving || !content.trim()}
-              className="flex-1 py-2.5 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
             <button
               onClick={() => router.push('/history')}
               disabled={saving}
-              className="flex-1 py-2.5 border border-gray-300 text-gray-600 rounded-lg font-medium hover:bg-gray-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 py-2.5 border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-slate-700 disabled:cursor-not-allowed transition-colors text-sm"
             >
               Cancel
             </button>

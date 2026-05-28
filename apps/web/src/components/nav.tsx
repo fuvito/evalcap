@@ -32,20 +32,20 @@ export function Nav() {
 
   return (
     <header className="border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
         <Link href="/dashboard" className="font-bold text-brand-600 dark:text-brand-400 text-lg whitespace-nowrap">
           EvalCap
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex gap-6 text-sm">
+        <nav className="hidden md:flex gap-5 text-sm">
           {links.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
-              className={`transition-colors whitespace-nowrap ${
+              className={`transition-colors whitespace-nowrap pb-0.5 ${
                 pathname === href
-                  ? 'text-brand-600 dark:text-brand-400 font-medium border-b-2 border-brand-600 dark:border-brand-400 pb-3'
+                  ? 'text-brand-600 dark:text-brand-400 font-medium underline underline-offset-4 decoration-brand-500/50'
                   : 'text-gray-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
