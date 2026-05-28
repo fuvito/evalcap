@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Nav } from '@/components/nav'
+import { SkeletonText } from '@/components/skeleton'
 
 export default function SummaryPage() {
   const router = useRouter()
@@ -104,8 +105,22 @@ export default function SummaryPage() {
         <p className="text-red-500 text-sm">{error}</p>
       )}
 
+      {loading && (
+        <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-brand-500 rounded-full animate-bounce"></div>
+            <p className="text-sm text-gray-600">Generating your summary...</p>
+          </div>
+          <div className="space-y-2">
+            <SkeletonText className="h-4" />
+            <SkeletonText className="h-4 w-5/6" />
+            <SkeletonText className="h-4 w-4/6" />
+          </div>
+        </div>
+      )}
+
       {/* Summary output */}
-      {summary && (
+      {summary && !loading && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Your Summary</h2>

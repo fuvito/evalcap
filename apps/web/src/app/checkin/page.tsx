@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Nav } from '@/components/nav'
 import { logger } from '@/lib/logger'
+import { SkeletonText } from '@/components/skeleton'
 
 export default function CheckInPage() {
   const router = useRouter()
@@ -107,7 +108,10 @@ export default function CheckInPage() {
       {loadingPrompts ? (
         <div className="space-y-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-32 bg-gray-100 rounded-xl animate-pulse" />
+            <div key={i} className="space-y-2">
+              <SkeletonText className="h-5 w-3/4" />
+              <SkeletonText className="h-24 w-full" />
+            </div>
           ))}
         </div>
       ) : (

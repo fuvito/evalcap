@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Nav } from '@/components/nav'
 import { logger } from '@/lib/logger'
+import { SkeletonText, SkeletonCard } from '@/components/skeleton'
 import type { Profile } from '@/types/database'
 
 interface ProfileData {
