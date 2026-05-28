@@ -156,12 +156,16 @@ MVP features (auth, checkin, history, summary, dashboard) appear complete. This 
 - [x] Placeholder for future settings (theme, notifications, export)
 - **Status**: Complete — Settings page with check-in preference and API integration
 
-### 17. Mobile Responsiveness Audit
-- [ ] Test all pages on mobile (iOS Safari, Android Chrome)
+### 17. Mobile Responsiveness Audit (IN PROGRESS)
+- [ ] Test all pages on mobile viewports (320px, 375px, 768px)
 - [ ] Fix layout issues (buttons, forms, text sizing)
 - [ ] Ensure touch-friendly tap targets (44x44 min)
-- [ ] Test navigation on mobile (hamburger menu if needed)
+- [ ] Test navigation on mobile (verify links/buttons accessible)
+- [ ] Check form inputs are large enough on mobile
+- [ ] Verify modals and dialogs work on small screens
+- [ ] Test hamburger menu if needed for small screens
 - **Why**: Users may access app on phone during work day.
+- **Status**: Starting implementation
 - **Time Est**: 4 hours
 
 ---
@@ -194,6 +198,7 @@ MVP features (auth, checkin, history, summary, dashboard) appear complete. This 
 - **Est**: 10 hours
 
 #### Account Management
+- [ ] Forgot password (on login)
 - [ ] Change password
 - [ ] Change email
 - [ ] Delete account (cascade delete user data)

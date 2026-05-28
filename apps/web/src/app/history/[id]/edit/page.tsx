@@ -118,7 +118,8 @@ export default function EditEntryPage() {
           <h1 className="text-3xl font-bold text-brand-700">Edit Entry</h1>
           <button
             onClick={() => router.push('/history')}
-            className="text-gray-600 hover:text-gray-900"
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+            title="Close"
           >
             ✕
           </button>
