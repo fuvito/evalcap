@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
     } catch (err) {
       if (err instanceof ValidationException) {
         logValidationError(err.errors, 'POST /api/prompts')
+        logger.warn('Validation failed on /api/prompts', { userId: user.id, errors: err.errors }, 'api')
         return NextResponse.json(
           { error: 'Invalid request', details: err.errors },
           { status: 400 }

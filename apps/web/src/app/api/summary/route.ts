@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
     } catch (err) {
       if (err instanceof ValidationException) {
         logValidationError(err.errors, 'POST /api/summary')
+        logger.warn('Validation failed on /api/summary', { userId: user.id, errors: err.errors }, 'api')
         return NextResponse.json(
           { error: 'Invalid request', details: err.errors },
           { status: 400 }
@@ -64,6 +65,7 @@ export async function POST(request: NextRequest) {
     const start = new Date(validatedStart)
     const end = new Date(validatedEnd)
     if (start > end) {
+      logger.warn('Invalid date range on /api/summary', { userId: user.id, start: validatedStart, end: validatedEnd }, 'api')
       return NextResponse.json(
         { error: 'Invalid request', details: [{ field: 'timeframeStart', message: 'Start date must be before end date' }] },
         { status: 400 }

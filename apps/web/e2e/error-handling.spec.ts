@@ -78,8 +78,8 @@ test.describe('Error Handling', () => {
     expect(await emailInput.evaluate((el: HTMLInputElement) => el.required)).toBe(true)
     expect(await passwordInput.evaluate((el: HTMLInputElement) => el.required)).toBe(true)
 
-    // Check autoComplete attributes
-    expect(await emailInput.evaluate((el: HTMLInputElement) => el.autoComplete)).toBe('email')
-    expect(await passwordInput.evaluate((el: HTMLInputElement) => el.autoComplete)).toBe('new-password')
+    // Check autocomplete attributes
+    expect(await emailInput.evaluate((el: HTMLInputElement) => el.autocomplete)).toBe('email')
+    expect(await passwordInput.evaluate((el: HTMLInputElement) => el.autocomplete)).toBe('new-password')
   })
 })
