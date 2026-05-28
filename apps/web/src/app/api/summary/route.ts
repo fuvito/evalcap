@@ -99,27 +99,8 @@ export async function POST(request: NextRequest) {
     const timeframe = `${validatedStart} to ${validatedEnd}`
     const summary = await generateSummary(entries, timeframe, validatedInstructions || undefined)
 
-    const { data: savedSummary, error: saveError } = await supabase
-      .from('summaries')
-      .insert({
-        user_id: user.id,
-        content: summary,
-        timeframe_start: validatedStart,
-        timeframe_end: validatedEnd,
-        user_instructions: validatedInstructions,
-      })
-      .select()
-      .single()
-
-    if (saveError) {
-      logger.warn('Failed to save summary to DB (returning result anyway)', saveError, 'api')
-    } else {
-      logger.info('Summary saved', { summaryId: savedSummary?.id }, 'api')
-    }
-
     return NextResponse.json({
       summary,
-      summaryId: savedSummary?.id,
       entriesUsed: entries.length,
     })
   } catch (error) {
