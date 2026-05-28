@@ -136,7 +136,7 @@ export default function CheckInPage() {
         <div className="space-y-5">
           {prompts.map((prompt, i) => (
             <div key={i} className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-900">
                 {prompt}
               </label>
               <textarea
@@ -144,7 +144,7 @@ export default function CheckInPage() {
                 onChange={e => setResponses(prev => ({ ...prev, [i]: e.target.value }))}
                 placeholder="Write your response here..."
                 rows={4}
-                className="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+                className="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
               />
             </div>
           ))}
@@ -162,7 +162,7 @@ export default function CheckInPage() {
         <button
           onClick={loadPrompts}
           disabled={loadingPrompts}
-          className="px-4 py-3 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors text-sm"
+          className="px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
         >
           Refresh prompts
         </button>
