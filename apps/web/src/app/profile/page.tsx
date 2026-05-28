@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Nav } from '@/components/nav'
@@ -198,7 +199,7 @@ export default function ProfilePage() {
               disabled={!editing}
               placeholder="Your full name"
               className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 ${
-                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : ''
+                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900'
               }`}
             />
           </div>
@@ -212,7 +213,7 @@ export default function ProfilePage() {
               disabled={!editing}
               placeholder="e.g., Senior Engineer"
               className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 ${
-                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : ''
+                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900'
               }`}
             />
           </div>
@@ -226,7 +227,7 @@ export default function ProfilePage() {
               disabled={!editing}
               placeholder="e.g., Engineering"
               className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 ${
-                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : ''
+                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900'
               }`}
             />
           </div>
@@ -240,7 +241,7 @@ export default function ProfilePage() {
               disabled={!editing}
               placeholder="Your manager's name"
               className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 ${
-                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : ''
+                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900'
               }`}
             />
           </div>
