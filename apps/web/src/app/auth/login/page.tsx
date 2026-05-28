@@ -32,7 +32,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8 bg-slate-50 dark:bg-slate-950">
+    <main className="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-slate-50 dark:bg-slate-950">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="text-brand-600 dark:text-brand-400 font-bold text-xl mb-6">EvalCap</div>

@@ -37,7 +37,7 @@ export default function SignupPage() {
 
   if (confirmed) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8 bg-slate-50 dark:bg-slate-950">
+      <main className="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-slate-50 dark:bg-slate-950">
         <div className="w-full max-w-sm text-center space-y-4">
           <div className="text-4xl">✉️</div>
           <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Check your email</h1>
@@ -54,7 +54,7 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8 bg-slate-50 dark:bg-slate-950">
+    <main className="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-slate-50 dark:bg-slate-950">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="text-brand-600 dark:text-brand-400 font-bold text-xl mb-6">EvalCap</div>

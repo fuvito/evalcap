@@ -100,7 +100,7 @@ export function Nav() {
                   key={href}
                   href={href}
                   onClick={() => setMenuOpen(false)}
-                  className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                  className={`px-4 py-3 rounded-lg transition-colors text-sm ${
                     pathname === href
                       ? 'text-brand-600 dark:text-brand-400 font-medium bg-brand-50 dark:bg-slate-800'
                       : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'
@@ -115,7 +115,7 @@ export function Nav() {
                   key={href}
                   href={href}
                   onClick={() => setMenuOpen(false)}
-                  className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                  className={`px-4 py-3 rounded-lg transition-colors text-sm ${
                     pathname === href
                       ? 'text-brand-600 dark:text-brand-400 font-medium bg-brand-50 dark:bg-slate-800'
                       : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'
@@ -126,7 +126,7 @@ export function Nav() {
               ))}
               <button
                 onClick={() => { handleSignOut(); setMenuOpen(false) }}
-                className="px-4 py-2 text-sm text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-colors text-left"
+                className="px-4 py-3 text-sm text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-colors text-left"
               >
                 Sign out
               </button>

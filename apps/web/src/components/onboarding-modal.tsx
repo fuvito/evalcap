@@ -50,15 +50,15 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 space-y-6">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
         {/* Step 1: Welcome */}
         {step === 1 && (
           <>
             <div className="text-center space-y-3">
               <div className="text-5xl">📝</div>
-              <h2 className="text-2xl font-bold text-gray-900">Welcome to EvalCap</h2>
-              <p className="text-gray-600">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Welcome to EvalCap</h2>
+              <p className="text-gray-600 dark:text-slate-400">
                 Your personal performance review journal for thoughtful, honest reflection.
               </p>
             </div>
@@ -66,14 +66,14 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
             <div className="space-y-3 pt-4">
               <button
                 onClick={() => setStep(2)}
-                className="w-full py-3 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors"
+                className="w-full py-3 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 transition-colors"
               >
                 Get Started
               </button>
               <button
                 onClick={handleSkip}
                 disabled={skipping}
-                className="w-full py-3 border border-gray-300 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="w-full py-3 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-slate-400 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
               >
                 Skip for now
               </button>
@@ -86,29 +86,29 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
           <>
             <div className="text-center space-y-3">
               <div className="text-5xl">⚙️</div>
-              <h2 className="text-2xl font-bold text-gray-900">How EvalCap Works</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">How EvalCap Works</h2>
             </div>
 
-            <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+            <div className="space-y-4 bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
               <div className="flex gap-3">
                 <div className="flex-shrink-0 text-xl">✓</div>
                 <div>
-                  <p className="font-medium text-gray-900">Daily & Weekly Check-ins</p>
-                  <p className="text-sm text-gray-600">Answer AI-powered prompts based on your recent work</p>
+                  <p className="font-medium text-gray-900 dark:text-slate-200">Daily & Weekly Check-ins</p>
+                  <p className="text-sm text-gray-600 dark:text-slate-400">Answer AI-powered prompts based on your recent work</p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <div className="flex-shrink-0 text-xl">✓</div>
                 <div>
-                  <p className="font-medium text-gray-900">Smart Prompts</p>
-                  <p className="text-sm text-gray-600">Prompts adapt based on your previous entries</p>
+                  <p className="font-medium text-gray-900 dark:text-slate-200">Smart Prompts</p>
+                  <p className="text-sm text-gray-600 dark:text-slate-400">Prompts adapt based on your previous entries</p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <div className="flex-shrink-0 text-xl">✓</div>
                 <div>
-                  <p className="font-medium text-gray-900">Performance Summaries</p>
-                  <p className="text-sm text-gray-600">Generate AI-compiled review summaries anytime</p>
+                  <p className="font-medium text-gray-900 dark:text-slate-200">Performance Summaries</p>
+                  <p className="text-sm text-gray-600 dark:text-slate-400">Generate AI-compiled review summaries anytime</p>
                 </div>
               </div>
             </div>
@@ -116,13 +116,13 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
             <div className="space-y-3 pt-2">
               <button
                 onClick={() => setStep(3)}
-                className="w-full py-3 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors"
+                className="w-full py-3 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 transition-colors"
               >
                 Continue
               </button>
               <button
                 onClick={() => setStep(1)}
-                className="w-full py-3 border border-gray-300 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                className="w-full py-3 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-slate-400 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Back
               </button>
@@ -135,10 +135,10 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
           <>
             <div className="text-center space-y-3">
               <div className="text-5xl">💡</div>
-              <h2 className="text-2xl font-bold text-gray-900">Why Journal?</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Why Journal?</h2>
             </div>
 
-            <div className="space-y-3 text-gray-700">
+            <div className="space-y-3 text-gray-700 dark:text-slate-300">
               <p className="text-sm">
                 Regular check-ins help you:
               </p>
@@ -170,13 +170,13 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
               <Link
                 href="/checkin"
                 onClick={handleComplete}
-                className="block w-full py-3 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors text-center"
+                className="block w-full py-3 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 transition-colors text-center"
               >
                 Create Your First Check-in →
               </Link>
               <button
                 onClick={() => setStep(2)}
-                className="w-full py-3 border border-gray-300 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                className="w-full py-3 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-slate-400 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Back
               </button>

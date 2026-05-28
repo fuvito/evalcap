@@ -62,17 +62,17 @@ export function EntryList({ entries: initialEntries }: EntryListProps) {
                 })}
               </span>
             </div>
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
               <Link
                 href={`/history/${entry.id}/edit`}
-                className="text-xs px-2.5 py-1 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                className="text-xs px-3 py-2 sm:px-2.5 sm:py-1 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
               >
                 Edit
               </Link>
               <button
                 onClick={() => setShowConfirm(entry.id)}
                 disabled={deletingId === entry.id}
-                className="text-xs px-2.5 py-1 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
+                className="text-xs px-3 py-2 sm:px-2.5 sm:py-1 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
               >
                 {deletingId === entry.id ? 'Deleting...' : 'Delete'}
               </button>
