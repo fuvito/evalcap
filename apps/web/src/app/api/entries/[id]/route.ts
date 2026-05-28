@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { sanitizeText } from '@/lib/validation'
 
@@ -86,6 +87,8 @@ export async function PATCH(
       return Response.json({ error: 'Entry not found or unauthorized' }, { status: 404 })
     }
 
+    revalidateTag(`entries-${user.id}`)
+    revalidatePath('/history')
     logger.info('Entry updated', { entryId: id }, 'api/entries')
     return Response.json({ entry })
   } catch (err) {
@@ -120,6 +123,8 @@ export async function DELETE(
       return Response.json({ error: 'Failed to delete entry' }, { status: 500 })
     }
 
+    revalidateTag(`entries-${user.id}`)
+    revalidatePath('/history')
     logger.info('Entry deleted', { entryId: id }, 'api/entries')
     return Response.json({ success: true })
   } catch (err) {

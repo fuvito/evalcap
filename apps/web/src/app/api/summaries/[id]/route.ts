@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { sanitizeText } from '@/lib/validation'
 
@@ -31,6 +32,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Summary not found or update failed' }, { status: 404 })
     }
 
+    revalidateTag(`summaries-${user.id}`)
+    revalidatePath('/summaries')
     logger.info('Summary updated', { summaryId: id }, 'api')
     return NextResponse.json({ summary: data })
   } catch (error) {
@@ -60,6 +63,8 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
       return NextResponse.json({ error: 'Failed to delete summary' }, { status: 500 })
     }
 
+    revalidateTag(`summaries-${user.id}`)
+    revalidatePath('/summaries')
     logger.info('Summary deleted', { summaryId: id }, 'api')
     return new NextResponse(null, { status: 204 })
   } catch (error) {

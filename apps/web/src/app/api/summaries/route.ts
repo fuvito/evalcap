@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { sanitizeText, validateDateString, validateOptionalString, ValidationException, logValidationError } from '@/lib/validation'
 
@@ -50,6 +51,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save summary' }, { status: 500 })
     }
 
+    revalidateTag(`summaries-${user.id}`)
+    revalidatePath('/summaries')
     logger.info('Summary saved', { summaryId: saved.id }, 'api')
     return NextResponse.json({ summaryId: saved.id }, { status: 201 })
   } catch (error) {

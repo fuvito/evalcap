@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import useSWR from 'swr'
 import { Nav } from '@/components/nav'
+import { fetcher } from '@/lib/fetcher'
 import type { EvaluationGoal, PersonalGoal, PerformanceCycle } from '@/types/database'
 
 // ─── Status helpers ────────────────────────────────────────────────────────
@@ -43,22 +45,14 @@ function formatDate(d: string) {
 export default function GoalsPage() {
   const [tab, setTab] = useState<'evaluation' | 'personal'>('evaluation')
 
-  const [evalGoals, setEvalGoals] = useState<EvaluationGoal[]>([])
-  const [personalGoals, setPersonalGoals] = useState<PersonalGoal[]>([])
-  const [cycles, setCycles] = useState<PerformanceCycle[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: evalData, mutate: mutateEval, isLoading: loadingEval } = useSWR<{ goals: EvaluationGoal[] }>('/api/goals/evaluation', fetcher)
+  const { data: personalData, mutate: mutatePersonal, isLoading: loadingPersonal } = useSWR<{ goals: PersonalGoal[] }>('/api/goals/personal', fetcher)
+  const { data: cyclesData } = useSWR<{ cycles: PerformanceCycle[] }>('/api/cycles', fetcher)
 
-  useEffect(() => {
-    Promise.all([
-      fetch('/api/goals/evaluation').then(r => r.json()),
-      fetch('/api/goals/personal').then(r => r.json()),
-      fetch('/api/cycles').then(r => r.json()),
-    ]).then(([evalData, personalData, cyclesData]) => {
-      if (evalData.goals) setEvalGoals(evalData.goals)
-      if (personalData.goals) setPersonalGoals(personalData.goals)
-      if (cyclesData.cycles) setCycles(cyclesData.cycles.filter((c: PerformanceCycle) => c.status === 'active'))
-    }).finally(() => setLoading(false))
-  }, [])
+  const evalGoals = evalData?.goals ?? []
+  const personalGoals = personalData?.goals ?? []
+  const cycles = (cyclesData?.cycles ?? []).filter(c => c.status === 'active')
+  const loading = loadingEval || loadingPersonal
 
   return (
     <>
@@ -98,9 +92,9 @@ export default function GoalsPage() {
             {[1, 2, 3].map(i => <div key={i} className="h-16 bg-gray-100 dark:bg-slate-800 rounded-xl animate-pulse" />)}
           </div>
         ) : tab === 'evaluation' ? (
-          <EvaluationTab goals={evalGoals} cycles={cycles} setGoals={setEvalGoals} />
+          <EvaluationTab goals={evalGoals} cycles={cycles} mutate={mutateEval} />
         ) : (
-          <PersonalTab goals={personalGoals} setGoals={setPersonalGoals} />
+          <PersonalTab goals={personalGoals} mutate={mutatePersonal} />
         )}
       </div>
     </>
@@ -112,11 +106,11 @@ export default function GoalsPage() {
 function EvaluationTab({
   goals,
   cycles,
-  setGoals,
+  mutate,
 }: {
   goals: EvaluationGoal[]
   cycles: PerformanceCycle[]
-  setGoals: React.Dispatch<React.SetStateAction<EvaluationGoal[]>>
+  mutate: () => void
 }) {
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
@@ -138,7 +132,7 @@ function EvaluationTab({
     })
     const data = await res.json()
     if (!res.ok) { setFormError(data.details?.[0]?.message || data.error || 'Failed to create'); setCreating(false); return }
-    setGoals(prev => [data.goal, ...prev])
+    mutate()
     setShowForm(false); setTitle(''); setDescription(''); setCycleId(''); setCreating(false)
   }
 
@@ -148,16 +142,13 @@ function EvaluationTab({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     })
-    if (res.ok) {
-      const data = await res.json()
-      setGoals(prev => prev.map(g => g.id === goal.id ? data.goal : g))
-    }
+    if (res.ok) mutate()
   }
 
   async function handleDelete(id: string) {
     setDeleting(id)
     await fetch(`/api/goals/evaluation/${id}`, { method: 'DELETE' })
-    setGoals(prev => prev.filter(g => g.id !== id))
+    mutate()
     setDeleting(null); setConfirmDelete(null)
   }
 
@@ -297,10 +288,10 @@ function EvalGoalCard({
 
 function PersonalTab({
   goals,
-  setGoals,
+  mutate,
 }: {
   goals: PersonalGoal[]
-  setGoals: React.Dispatch<React.SetStateAction<PersonalGoal[]>>
+  mutate: () => void
 }) {
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
@@ -324,7 +315,7 @@ function PersonalTab({
     })
     const data = await res.json()
     if (!res.ok) { setFormError(data.details?.[0]?.message || data.error || 'Failed to create'); setCreating(false); return }
-    setGoals(prev => [data.goal, ...prev])
+    mutate()
     setShowForm(false); setTitle(''); setDescription(''); setCategory(''); setPriority('medium'); setDueDate(''); setCreating(false)
   }
 
@@ -335,16 +326,13 @@ function PersonalTab({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
     })
-    if (res.ok) {
-      const data = await res.json()
-      setGoals(prev => prev.map(g => g.id === goal.id ? data.goal : g))
-    }
+    if (res.ok) mutate()
   }
 
   async function handleDelete(id: string) {
     setDeleting(id)
     await fetch(`/api/goals/personal/${id}`, { method: 'DELETE' })
-    setGoals(prev => prev.filter(g => g.id !== id))
+    mutate()
     setDeleting(null); setConfirmDelete(null)
   }
 

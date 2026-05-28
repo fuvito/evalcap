@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import useSWR from 'swr'
 import { useSearchParams } from 'next/navigation'
 import { Nav } from '@/components/nav'
 import { SkeletonText } from '@/components/skeleton'
+import { fetcher } from '@/lib/fetcher'
 import type { PerformanceCycle } from '@/types/database'
 
 export default function SummaryPage() {
@@ -16,13 +18,9 @@ export default function SummaryPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
-  const [cycles, setCycles] = useState<PerformanceCycle[]>([])
 
-  useEffect(() => {
-    fetch('/api/cycles').then(r => r.json()).then(d => {
-      if (d.cycles) setCycles(d.cycles.filter((c: PerformanceCycle) => c.status === 'active'))
-    }).catch(() => {})
-  }, [])
+  const { data: cyclesData } = useSWR<{ cycles: PerformanceCycle[] }>('/api/cycles', fetcher)
+  const cycles = (cyclesData?.cycles ?? []).filter(c => c.status === 'active')
 
   async function handleGenerate() {
     if (!timeframeStart || !timeframeEnd) return

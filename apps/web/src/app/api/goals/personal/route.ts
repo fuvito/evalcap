@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { revalidateTag } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { validateOptionalString, ValidationException } from '@/lib/validation'
 
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create goal' }, { status: 500 })
     }
 
+    revalidateTag(`goals-${user.id}`)
     return NextResponse.json({ goal }, { status: 201 })
   } catch (error) {
     logger.error('Unhandled error in POST /api/goals/personal', error, 'api')

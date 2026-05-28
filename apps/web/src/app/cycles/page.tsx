@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import useSWR from 'swr'
 import Link from 'next/link'
 import { Nav } from '@/components/nav'
+import { fetcher } from '@/lib/fetcher'
 import type { PerformanceCycle } from '@/types/database'
 
 const YEAR = new Date().getFullYear()
@@ -22,8 +24,9 @@ function formatDate(dateStr: string) {
 }
 
 export default function CyclesPage() {
-  const [cycles, setCycles] = useState<PerformanceCycle[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data, mutate, isLoading } = useSWR<{ cycles: PerformanceCycle[] }>('/api/cycles', fetcher)
+  const cycles = data?.cycles ?? []
+
   const [showForm, setShowForm] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
 
@@ -38,18 +41,6 @@ export default function CyclesPage() {
   const [archiving, setArchiving] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
-
-  useEffect(() => { loadCycles() }, [])
-
-  async function loadCycles() {
-    setLoading(true)
-    const res = await fetch('/api/cycles')
-    if (res.ok) {
-      const data = await res.json()
-      setCycles(data.cycles)
-    }
-    setLoading(false)
-  }
 
   function applyPreset(preset: typeof PRESETS[number]) {
     setName(preset.name)
@@ -69,15 +60,15 @@ export default function CyclesPage() {
       body: JSON.stringify({ name, start_date: startDate, end_date: endDate }),
     })
 
-    const data = await res.json()
+    const resData = await res.json()
 
     if (!res.ok) {
-      setFormError(data.details?.[0]?.message || data.error || 'Failed to create cycle')
+      setFormError(resData.details?.[0]?.message || resData.error || 'Failed to create cycle')
       setCreating(false)
       return
     }
 
-    setCycles(prev => [data.cycle, ...prev])
+    await mutate()
     setShowForm(false)
     setName('')
     setStartDate('')
@@ -93,19 +84,14 @@ export default function CyclesPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
     })
-    if (res.ok) {
-      const data = await res.json()
-      setCycles(prev => prev.map(c => c.id === cycle.id ? data.cycle : c))
-    }
+    if (res.ok) await mutate()
     setArchiving(null)
   }
 
   async function handleDelete(id: string) {
     setDeleting(id)
     const res = await fetch(`/api/cycles/${id}`, { method: 'DELETE' })
-    if (res.ok) {
-      setCycles(prev => prev.filter(c => c.id !== id))
-    }
+    if (res.ok) await mutate()
     setDeleting(null)
     setConfirmDelete(null)
   }
@@ -211,13 +197,13 @@ export default function CyclesPage() {
         )}
 
         {/* Active cycles */}
-        {loading ? (
+        {isLoading ? (
           <div className="space-y-3">
             {[1, 2].map(i => (
               <div key={i} className="h-20 bg-gray-100 dark:bg-slate-800 rounded-xl animate-pulse" />
             ))}
           </div>
-        ) : activeCycles.length === 0 && !showForm ? (
+        ) : activeCycles.length === 0 && !isLoading && !showForm ? (
           <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm">
             <p className="text-slate-400 dark:text-slate-500 text-sm mb-4">No cycles yet. Create one to organise your summaries by period.</p>
             <button

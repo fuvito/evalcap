@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { revalidateTag } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { validateOptionalString, ValidationException } from '@/lib/validation'
 
@@ -49,6 +50,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Failed to update goal' }, { status: error ? 500 : 404 })
     }
 
+    revalidateTag(`goals-${user.id}`)
     return NextResponse.json({ goal })
   } catch (error) {
     logger.error('Unhandled error in PATCH /api/goals/evaluation/[id]', error, 'api')
@@ -74,6 +76,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
       return NextResponse.json({ error: 'Failed to delete goal' }, { status: 500 })
     }
 
+    revalidateTag(`goals-${user.id}`)
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     logger.error('Unhandled error in DELETE /api/goals/evaluation/[id]', error, 'api')

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Nav } from '@/components/nav'
 import { logger } from '@/lib/logger'
@@ -9,7 +8,6 @@ import { SkeletonText } from '@/components/skeleton'
 
 export default function CheckInPage() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [checkInType, setCheckInType] = useState<'daily' | 'weekly'>('weekly')
   const [prompts, setPrompts] = useState<string[]>([])
@@ -103,16 +101,12 @@ export default function CheckInPage() {
 
     setSaving(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      await supabase.from('journal_entries').insert({
-        user_id: user.id,
-        content: combinedContent,
-        check_in_type: checkInType,
-        prompt_used: prompts.join(' | '),
+      const res = await fetch('/api/entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: combinedContent, checkInType, promptUsed: prompts.join(' | ') }),
       })
-
+      if (!res.ok) throw new Error('Failed to save')
       router.push('/dashboard')
     } catch (err) {
       logger.error('Save check-in failed', err, 'checkin')

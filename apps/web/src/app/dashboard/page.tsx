@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getCachedDashboardData } from '@/lib/cache'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Nav } from '@/components/nav'
@@ -18,22 +19,8 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  // Fetch all data in parallel
-  const [
-    { count: entryCount },
-    { count: summaryCount },
-    { data: recentEntries },
-    { data: activeCycles },
-    { data: inProgressGoals },
-    { data: highPriorityGoals },
-  ] = await Promise.all([
-    supabase.from('journal_entries').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-    supabase.from('summaries').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-    supabase.from('journal_entries').select('id, content, created_at, check_in_type').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3),
-    supabase.from('performance_cycles').select('*').eq('user_id', user.id).eq('status', 'active').order('start_date', { ascending: false }),
-    supabase.from('evaluation_goals').select('*').eq('user_id', user.id).in('status', ['not_started', 'in_progress']).order('created_at', { ascending: false }).limit(4),
-    supabase.from('personal_goals').select('*').eq('user_id', user.id).eq('status', 'active').eq('priority', 'high').order('created_at', { ascending: false }).limit(3),
-  ])
+  const { entryCount, summaryCount, recentEntries, activeCycles, inProgressGoals, highPriorityGoals } =
+    await getCachedDashboardData(user.id)
 
   const isFirstTime = !entryCount || entryCount === 0
 

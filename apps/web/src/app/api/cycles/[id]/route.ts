@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { revalidateTag } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { validateDateString, validateOptionalString, ValidationException } from '@/lib/validation'
 
@@ -61,6 +62,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
+    revalidateTag(`cycles-${user.id}`)
     return NextResponse.json({ cycle })
   } catch (error) {
     logger.error('Unhandled error in PATCH /api/cycles/[id]', error, 'api')
@@ -89,6 +91,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
       return NextResponse.json({ error: 'Failed to delete cycle' }, { status: 500 })
     }
 
+    revalidateTag(`cycles-${user.id}`)
     logger.info('Cycle deleted', { userId: user.id, cycleId: id }, 'api')
     return new NextResponse(null, { status: 204 })
   } catch (error) {
