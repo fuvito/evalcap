@@ -30,10 +30,9 @@ export default function CheckInPage() {
           setCheckInType(data.profile.default_check_in_type)
         }
       } catch (err) {
-        logger.debug('Could not load default check-in type', err, 'checkin')
+        // Profile load is optional, continue with default check-in type
       }
 
-      // Load initial prompts
       await loadPrompts()
       initializedRef.current = true
     }
@@ -41,6 +40,8 @@ export default function CheckInPage() {
     if (!initializedRef.current) {
       initializePage()
     }
+
+    return () => {}
   }, [])
 
   const FALLBACK_PROMPTS = [
@@ -125,7 +126,7 @@ export default function CheckInPage() {
   return (
     <>
       <Nav />
-    <div className="max-w-3xl mx-auto p-8 space-y-6">
+    <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-brand-700">New Check-in</h1>
         <div className="flex gap-2">

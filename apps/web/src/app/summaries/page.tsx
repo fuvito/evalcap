@@ -18,12 +18,12 @@ export default async function SummariesPage() {
   return (
     <>
       <Nav />
-      <div className="max-w-3xl mx-auto p-8 space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <h1 className="text-3xl font-bold text-brand-700">Saved Summaries</h1>
           <Link
             href="/summary"
-            className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors"
+            className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors whitespace-nowrap"
           >
             + Generate New
           </Link>

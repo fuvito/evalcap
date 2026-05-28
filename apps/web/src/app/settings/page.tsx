@@ -80,7 +80,7 @@ export default function SettingsPage() {
     return (
       <>
         <Nav />
-        <div className="max-w-3xl mx-auto p-8">
+        <div className="max-w-3xl mx-auto p-4 md:p-8">
           <div className="h-8 bg-gray-200 rounded w-1/4 animate-pulse"></div>
         </div>
       </>
@@ -90,10 +90,8 @@ export default function SettingsPage() {
   return (
     <>
       <Nav />
-      <div className="max-w-3xl mx-auto p-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-brand-700">Settings</h1>
-        </div>
+      <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
+        <h1 className="text-3xl font-bold text-brand-700">Settings</h1>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
