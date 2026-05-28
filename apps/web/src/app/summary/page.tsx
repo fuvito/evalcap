@@ -1,12 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Nav } from '@/components/nav'
 import { SkeletonText } from '@/components/skeleton'
 
 export default function SummaryPage() {
-  const [timeframeStart, setTimeframeStart] = useState('')
-  const [timeframeEnd, setTimeframeEnd] = useState('')
+  const params = useSearchParams()
+  const [timeframeStart, setTimeframeStart] = useState(params.get('start') ?? '')
+  const [timeframeEnd, setTimeframeEnd] = useState(params.get('end') ?? '')
   const [userInstructions, setUserInstructions] = useState('')
   const [summary, setSummary] = useState('')
   const [loading, setLoading] = useState(false)
