@@ -18,7 +18,7 @@ export default async function HistoryPage() {
   return (
     <>
       <Nav />
-      <div className="max-w-2xl mx-auto p-8 space-y-6">
+      <div className="max-w-3xl mx-auto p-8 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-brand-700">All Check-ins</h1>
           <Link

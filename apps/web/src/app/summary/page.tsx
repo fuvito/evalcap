@@ -46,7 +46,7 @@ export default function SummaryPage() {
   return (
     <>
       <Nav />
-    <div className="max-w-2xl mx-auto p-8 space-y-6">
+    <div className="max-w-3xl mx-auto p-8 space-y-6">
       <h1 className="text-2xl font-bold text-brand-700">Generate Summary</h1>
       <p className="text-gray-500 text-sm">
         Select a timeframe and EvalCap will compile your journal entries into a
@@ -146,7 +146,7 @@ export default function SummaryPage() {
             value={summary}
             onChange={e => setSummary(e.target.value)}
             rows={16}
-            className="w-full border border-gray-300 rounded-lg p-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none font-mono"
+            className="w-full border border-gray-300 rounded-lg p-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none font-mono bg-white"
           />
           <p className="text-xs text-gray-400">
             You can edit this summary directly above before copying or sharing it.

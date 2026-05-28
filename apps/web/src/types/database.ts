@@ -14,6 +14,8 @@ export type Database = {
           job_title: string | null
           department: string | null
           manager_name: string | null
+          default_check_in_type: 'daily' | 'weekly'
+          onboarding_completed: boolean
           created_at: string
           updated_at: string
         }
@@ -25,6 +27,8 @@ export type Database = {
           job_title?: string | null
           department?: string | null
           manager_name?: string | null
+          default_check_in_type?: 'daily' | 'weekly'
+          onboarding_completed?: boolean
         }
         Update: {
           full_name?: string | null
@@ -32,6 +36,8 @@ export type Database = {
           job_title?: string | null
           department?: string | null
           manager_name?: string | null
+          default_check_in_type?: 'daily' | 'weekly'
+          onboarding_completed?: boolean
         }
         Relationships: []
       }
