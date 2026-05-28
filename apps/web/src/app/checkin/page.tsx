@@ -144,7 +144,7 @@ export default function CheckInPage() {
                 onChange={e => setResponses(prev => ({ ...prev, [i]: e.target.value }))}
                 placeholder="Write your response here..."
                 rows={4}
-                className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+                className="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
               />
             </div>
           ))}

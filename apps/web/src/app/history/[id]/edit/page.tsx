@@ -146,7 +146,7 @@ export default function EditEntryPage() {
               value={content}
               onChange={e => setContent(e.target.value)}
               rows={12}
-              className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
               placeholder="Your check-in content..."
             />
             <p className="text-xs text-gray-400 mt-1">
