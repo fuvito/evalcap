@@ -20,6 +20,7 @@ export function Nav() {
     { href: '/checkin', label: 'Check-in' },
     { href: '/history', label: 'History' },
     { href: '/summary', label: 'Summary' },
+    { href: '/summaries', label: 'Summaries' },
   ] as const
 
   const accountLinks = [

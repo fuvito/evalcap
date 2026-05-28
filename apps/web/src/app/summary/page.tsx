@@ -125,14 +125,22 @@ export default function SummaryPage() {
       {/* Summary output */}
       {summary && !loading && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold">Your Summary</h2>
-            <button
-              onClick={() => navigator.clipboard.writeText(summary)}
-              className="text-sm text-brand-500 hover:underline"
-            >
-              Copy to clipboard
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigator.clipboard.writeText(summary)}
+                className="text-sm text-brand-500 hover:underline"
+              >
+                📋 Copy
+              </button>
+              <a
+                href="/summaries"
+                className="text-sm text-brand-500 hover:underline"
+              >
+                📚 View all
+              </a>
+            </div>
           </div>
           <textarea
             value={summary}
@@ -141,13 +149,13 @@ export default function SummaryPage() {
             className="w-full border border-gray-300 rounded-lg p-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none font-mono"
           />
           <p className="text-xs text-gray-400">
-            You can edit this summary directly above before using it.
+            You can edit this summary directly above before copying or sharing it.
           </p>
           <button
             onClick={handleGenerate}
             className="text-sm text-brand-500 hover:underline"
           >
-            Regenerate with different instructions →
+            🔄 Regenerate with different instructions →
           </button>
         </div>
       )}
