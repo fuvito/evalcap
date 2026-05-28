@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { revalidateTag, revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
-import { sanitizeText } from '@/lib/validation'
+import { sanitizeText, ValidationException } from '@/lib/validation'
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -14,9 +14,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const { id } = await params
     const body = await request.json()
-    const content = sanitizeText(body.content)
-    if (!content) {
-      return NextResponse.json({ error: 'Content is required' }, { status: 400 })
+    let content: string
+    try {
+      content = sanitizeText(body.content)
+    } catch (err) {
+      if (err instanceof ValidationException) {
+        return NextResponse.json({ error: 'Invalid request', details: err.errors }, { status: 400 })
+      }
+      throw err
     }
 
     const { data, error } = await supabase
