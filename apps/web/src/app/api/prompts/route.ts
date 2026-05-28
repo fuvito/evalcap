@@ -73,7 +73,18 @@ export async function POST(request: NextRequest) {
 
     logger.debug('Fetched recent entries', { count: entries?.length ?? 0 }, 'api')
 
-    const prompts = await generateSmartPrompts(entries || [], validatedCheckInType)
+    // Fetch active goals for context
+    const [evalGoalsRes, personalGoalsRes] = await Promise.all([
+      supabase.from('evaluation_goals').select('title, status').eq('user_id', user.id).neq('status', 'cancelled'),
+      supabase.from('personal_goals').select('title, category, priority, status').eq('user_id', user.id).eq('status', 'active'),
+    ])
+
+    const goals = {
+      evaluationGoals: evalGoalsRes.data ?? [],
+      personalGoals: personalGoalsRes.data ?? [],
+    }
+
+    const prompts = await generateSmartPrompts(entries || [], validatedCheckInType, goals)
 
     logger.info('Prompts generated successfully', { count: prompts.length }, 'api')
     return NextResponse.json({ prompts })

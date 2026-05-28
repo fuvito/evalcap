@@ -209,6 +209,88 @@ CREATE INDEX IF NOT EXISTS performance_cycles_user_idx
 
 
 -- ─────────────────────────────────────────────────────────────
+-- evaluation_goals
+-- ─────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS evaluation_goals (
+  id          UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id     UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  cycle_id    UUID        REFERENCES performance_cycles(id) ON DELETE SET NULL,
+  title       TEXT        NOT NULL,
+  description TEXT,
+  status      TEXT        NOT NULL DEFAULT 'not_started'
+                CHECK (status IN ('not_started', 'in_progress', 'completed', 'cancelled')),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE evaluation_goals ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own evaluation goals"   ON evaluation_goals;
+DROP POLICY IF EXISTS "Users can insert own evaluation goals" ON evaluation_goals;
+DROP POLICY IF EXISTS "Users can update own evaluation goals" ON evaluation_goals;
+DROP POLICY IF EXISTS "Users can delete own evaluation goals" ON evaluation_goals;
+
+CREATE POLICY "Users can view own evaluation goals"
+  ON evaluation_goals FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own evaluation goals"
+  ON evaluation_goals FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own evaluation goals"
+  ON evaluation_goals FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete own evaluation goals"
+  ON evaluation_goals FOR DELETE USING (auth.uid() = user_id);
+
+CREATE OR REPLACE TRIGGER evaluation_goals_updated_at
+  BEFORE UPDATE ON evaluation_goals
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON evaluation_goals TO authenticated;
+CREATE INDEX IF NOT EXISTS evaluation_goals_user_idx ON evaluation_goals(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS evaluation_goals_cycle_idx ON evaluation_goals(cycle_id);
+
+
+-- ─────────────────────────────────────────────────────────────
+-- personal_goals
+-- ─────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS personal_goals (
+  id          UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id     UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  title       TEXT        NOT NULL,
+  description TEXT,
+  category    TEXT        CHECK (category IN ('promotion', 'certification', 'skill', 'habit', 'other')),
+  priority    TEXT        NOT NULL DEFAULT 'medium'
+                CHECK (priority IN ('low', 'medium', 'high')),
+  due_date    DATE,
+  status      TEXT        NOT NULL DEFAULT 'active'
+                CHECK (status IN ('active', 'completed', 'cancelled')),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE personal_goals ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own personal goals"   ON personal_goals;
+DROP POLICY IF EXISTS "Users can insert own personal goals" ON personal_goals;
+DROP POLICY IF EXISTS "Users can update own personal goals" ON personal_goals;
+DROP POLICY IF EXISTS "Users can delete own personal goals" ON personal_goals;
+
+CREATE POLICY "Users can view own personal goals"
+  ON personal_goals FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own personal goals"
+  ON personal_goals FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own personal goals"
+  ON personal_goals FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete own personal goals"
+  ON personal_goals FOR DELETE USING (auth.uid() = user_id);
+
+CREATE OR REPLACE TRIGGER personal_goals_updated_at
+  BEFORE UPDATE ON personal_goals
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON personal_goals TO authenticated;
+CREATE INDEX IF NOT EXISTS personal_goals_user_idx ON personal_goals(user_id, created_at DESC);
+
+
+-- ─────────────────────────────────────────────────────────────
 -- Auto-create profile row on signup
 -- ─────────────────────────────────────────────────────────────
 -- SECURITY DEFINER so the trigger runs as the owner and bypasses RLS.

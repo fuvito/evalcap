@@ -96,8 +96,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Fetch goals for context (eval goals active during this period, active personal goals)
+    const [evalGoalsRes, personalGoalsRes] = await Promise.all([
+      supabase.from('evaluation_goals').select('title, status').eq('user_id', user.id).neq('status', 'cancelled'),
+      supabase.from('personal_goals').select('title, category, priority, status').eq('user_id', user.id).eq('status', 'active'),
+    ])
+
+    const goals = {
+      evaluationGoals: evalGoalsRes.data ?? [],
+      personalGoals: personalGoalsRes.data ?? [],
+    }
+
     const timeframe = `${validatedStart} to ${validatedEnd}`
-    const summary = await generateSummary(entries, timeframe, validatedInstructions || undefined)
+    const summary = await generateSummary(entries, timeframe, validatedInstructions || undefined, goals)
 
     return NextResponse.json({
       summary,

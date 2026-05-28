@@ -17,19 +17,42 @@ export interface JournalEntry {
   prompt_used?: string | null
 }
 
+export interface GoalContext {
+  evaluationGoals: { title: string; status: string }[]
+  personalGoals: { title: string; category: string | null; priority: string }[]
+}
+
+function formatGoalsContext(goals: GoalContext): string {
+  const lines: string[] = []
+  const activeEval = goals.evaluationGoals.filter(g => g.status !== 'cancelled')
+  const activePersonal = goals.personalGoals.filter(g => g.status !== 'cancelled' && g.priority !== undefined)
+
+  if (activeEval.length > 0) {
+    lines.push('Evaluation goals:')
+    activeEval.forEach(g => lines.push(`- "${g.title}" [${g.status.replace('_', ' ')}]`))
+  }
+  if (activePersonal.length > 0) {
+    lines.push('Personal goals:')
+    activePersonal.forEach(g => lines.push(`- "${g.title}"${g.category ? ` (${g.category})` : ''} [${g.priority} priority]`))
+  }
+
+  return lines.join('\n')
+}
+
 export async function generateSmartPrompts(
   previousEntries: JournalEntry[],
-  checkInType: 'daily' | 'weekly'
+  checkInType: 'daily' | 'weekly',
+  goals?: GoalContext
 ): Promise<string[]> {
-  // Sanitize entries to prevent prompt injection
   const context = previousEntries
     .slice(-5)
     .map(e => {
-      // Truncate entries to prevent token exhaustion
       const truncatedContent = e.content.substring(0, 1000)
       return `[${e.created_at}]: ${truncatedContent}`
     })
     .join('\n')
+
+  const goalsContext = goals ? formatGoalsContext(goals) : ''
 
   logger.info(`Generating ${checkInType} prompts`, { entryCount: previousEntries.length }, 'claude')
 
@@ -43,11 +66,15 @@ Generate prompts that are:
 - Focused on achievements, impact, and professional growth
 - Honest and grounded — not leading toward exaggeration
 - Concise and easy to answer
+${goalsContext ? '- When relevant, reference the person\'s stated goals to prompt reflection on progress' : ''}
 Return exactly 3 prompts as a JSON array of strings. No other text.`,
     messages: [
       {
         role: 'user',
-        content: `Generate ${checkInType} check-in prompts for this person based on their recent journal entries:\n\n${context || 'No previous entries — this is their first check-in.'}`,
+        content: `Generate ${checkInType} check-in prompts for this person.
+
+${goalsContext ? `Their current goals:\n${goalsContext}\n\n` : ''}Recent journal entries:
+${context || 'No previous entries — this is their first check-in.'}`,
       },
     ],
   })
@@ -72,19 +99,18 @@ Return exactly 3 prompts as a JSON array of strings. No other text.`,
 export async function generateSummary(
   entries: JournalEntry[],
   timeframe: string,
-  userInstructions?: string
+  userInstructions?: string,
+  goals?: GoalContext
 ): Promise<string> {
-  // Sanitize entries to prevent prompt injection and token exhaustion
   const journalContent = entries
     .map(e => {
-      // Truncate entries to prevent token exhaustion
       const truncatedContent = e.content.substring(0, 2000)
       return `[${e.created_at}]: ${truncatedContent}`
     })
     .join('\n\n')
 
-  // Sanitize user instructions
   const sanitizedInstructions = userInstructions ? userInstructions.substring(0, 500) : undefined
+  const goalsContext = goals ? formatGoalsContext(goals) : ''
 
   logger.info('Generating performance summary', { entryCount: entries.length, timeframe }, 'claude')
 
@@ -101,13 +127,14 @@ CRITICAL RULES:
 - DO highlight real impact and contributions
 - DO organize logically (achievements, projects, growth)
 - Keep it factual, grounded, and credible
-- Write in first person`,
+- Write in first person
+${goalsContext ? '- Where the journal entries show progress against stated goals, include that naturally in the summary' : ''}`,
     messages: [
       {
         role: 'user',
         content: `Create a performance review summary for the timeframe: ${timeframe}
 
-${sanitizedInstructions ? `Additional instructions: ${sanitizedInstructions}\n\n` : ''}Journal entries:
+${goalsContext ? `Goals for this period:\n${goalsContext}\n\n` : ''}${sanitizedInstructions ? `Additional instructions: ${sanitizedInstructions}\n\n` : ''}Journal entries:
 ${journalContent}`,
       },
     ],
