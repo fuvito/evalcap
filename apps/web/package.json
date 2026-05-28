@@ -10,6 +10,8 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --forceExit",
+    "test:ci": "jest --coverage --ci --forceExit",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },

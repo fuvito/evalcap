@@ -1,11 +1,60 @@
 import {
+  sanitizeText,
   validateCheckInType,
   validateDateString,
+  validateJSON,
   validateOptionalString,
   ValidationException,
 } from '../validation'
 
 describe('validation', () => {
+  describe('sanitizeText', () => {
+    it('returns trimmed string', () => {
+      expect(sanitizeText('  hello  ')).toBe('hello')
+    })
+
+    it('accepts normal text', () => {
+      expect(sanitizeText('Completed the Q1 launch')).toBe('Completed the Q1 launch')
+    })
+
+    it('rejects non-string', () => {
+      expect(() => sanitizeText(123)).toThrow(ValidationException)
+    })
+
+    it('rejects empty string after trimming', () => {
+      expect(() => sanitizeText('   ')).toThrow(ValidationException)
+    })
+
+    it('rejects string longer than 5000 characters', () => {
+      expect(() => sanitizeText('a'.repeat(5001))).toThrow(ValidationException)
+    })
+
+    it('accepts exactly 5000 characters', () => {
+      const result = sanitizeText('a'.repeat(5000))
+      expect(result.length).toBe(5000)
+    })
+  })
+
+  describe('validateJSON', () => {
+    it('parses valid JSON object', () => {
+      const result = validateJSON('{"key": "value"}')
+      expect(result).toEqual({ key: 'value' })
+    })
+
+    it('parses valid JSON array', () => {
+      const result = validateJSON('["a", "b"]')
+      expect(result).toEqual(['a', 'b'])
+    })
+
+    it('throws ValidationException on invalid JSON', () => {
+      expect(() => validateJSON('not json')).toThrow(ValidationException)
+    })
+
+    it('throws ValidationException on malformed JSON', () => {
+      expect(() => validateJSON('{key: value}')).toThrow(ValidationException)
+    })
+  })
+
   describe('validateCheckInType', () => {
     it('accepts "daily"', () => {
       expect(validateCheckInType('daily')).toBe('daily')

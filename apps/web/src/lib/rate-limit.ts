@@ -69,4 +69,4 @@ setInterval(() => {
   if (cleaned > 0) {
     logger.debug('Rate limit cleanup', { cleaned }, 'rate-limit')
   }
-}, 5 * 60 * 1000)
+}, 5 * 60 * 1000).unref()
