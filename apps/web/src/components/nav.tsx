@@ -31,9 +31,9 @@ export function Nav() {
   ] as const
 
   return (
-    <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
+    <header className="border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-50 shadow-sm">
       <div className="max-w-6xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
-        <Link href="/dashboard" className="font-bold text-brand-700 text-lg whitespace-nowrap">
+        <Link href="/dashboard" className="font-bold text-brand-600 dark:text-brand-400 text-lg whitespace-nowrap">
           EvalCap
         </Link>
 
@@ -45,8 +45,8 @@ export function Nav() {
               href={href}
               className={`transition-colors whitespace-nowrap ${
                 pathname === href
-                  ? 'text-brand-600 font-medium border-b-2 border-brand-600 pb-3'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-brand-600 dark:text-brand-400 font-medium border-b-2 border-brand-600 dark:border-brand-400 pb-3'
+                  : 'text-gray-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
               {label}
@@ -63,18 +63,18 @@ export function Nav() {
                 href={href}
                 className={`transition-colors ${
                   pathname === href
-                    ? 'text-brand-600 font-medium'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'text-brand-600 dark:text-brand-400 font-medium'
+                    : 'text-gray-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 {label}
               </Link>
             ))}
           </nav>
-          <div className="w-px h-6 bg-gray-200"></div>
+          <div className="w-px h-6 bg-gray-200 dark:bg-slate-700"></div>
           <button
             onClick={handleSignOut}
-            className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            className="text-sm text-gray-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
           >
             Sign out
           </button>
@@ -83,53 +83,50 @@ export function Nav() {
         {/* Mobile menu button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
           aria-label="Toggle menu"
         >
-          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-gray-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={menuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
           </svg>
         </button>
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="absolute top-14 left-0 right-0 bg-white border-b border-gray-200 md:hidden">
-            <nav className="flex flex-col p-4 gap-2">
+          <div className="absolute top-14 left-0 right-0 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 md:hidden">
+            <nav className="flex flex-col p-4 gap-1">
               {links.map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}
                   onClick={() => setMenuOpen(false)}
-                  className={`px-4 py-2 rounded transition-colors text-sm ${
+                  className={`px-4 py-2 rounded-lg transition-colors text-sm ${
                     pathname === href
-                      ? 'text-brand-600 font-medium bg-blue-50'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'text-brand-600 dark:text-brand-400 font-medium bg-brand-50 dark:bg-slate-800'
+                      : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'
                   }`}
                 >
                   {label}
                 </Link>
               ))}
-              <div className="border-t border-gray-200 my-2"></div>
+              <div className="border-t border-gray-100 dark:border-slate-800 my-2"></div>
               {accountLinks.map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}
                   onClick={() => setMenuOpen(false)}
-                  className={`px-4 py-2 rounded transition-colors text-sm ${
+                  className={`px-4 py-2 rounded-lg transition-colors text-sm ${
                     pathname === href
-                      ? 'text-brand-600 font-medium bg-blue-50'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'text-brand-600 dark:text-brand-400 font-medium bg-brand-50 dark:bg-slate-800'
+                      : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'
                   }`}
                 >
                   {label}
                 </Link>
               ))}
               <button
-                onClick={() => {
-                  handleSignOut()
-                  setMenuOpen(false)
-                }}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded transition-colors text-left"
+                onClick={() => { handleSignOut(); setMenuOpen(false) }}
+                className="px-4 py-2 text-sm text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-colors text-left"
               >
                 Sign out
               </button>

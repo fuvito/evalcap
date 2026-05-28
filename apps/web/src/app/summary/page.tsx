@@ -46,74 +46,73 @@ export default function SummaryPage() {
   return (
     <>
       <Nav />
-    <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
-      <h1 className="text-2xl font-bold text-brand-700">Generate Summary</h1>
-      <p className="text-gray-500 text-sm">
-        Select a timeframe and EvalCap will compile your journal entries into a
-        polished, honest performance review summary.
-      </p>
-
-      {/* Timeframe selection */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            From
-          </label>
-          <input
-            type="date"
-            value={timeframeStart}
-            onChange={e => setTimeframeStart(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-gray-900 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            To
-          </label>
-          <input
-            type="date"
-            value={timeframeEnd}
-            onChange={e => setTimeframeEnd(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-gray-900 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
-          />
-        </div>
-      </div>
-
-      {/* Optional instructions */}
+    <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Additional instructions (optional)
-        </label>
-        <textarea
-          value={userInstructions}
-          onChange={e => setUserInstructions(e.target.value)}
-          placeholder="E.g. Focus more on the Q2 product launch. Include leadership contributions."
-          rows={3}
-          className="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
-        />
+        <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Generate Summary</h1>
+        <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">
+          Select a timeframe and EvalCap will compile your journal entries into a polished, honest performance review summary.
+        </p>
       </div>
 
-      <button
-        onClick={handleGenerate}
-        disabled={!timeframeStart || !timeframeEnd || loading}
-        className="w-full py-3 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        {loading ? 'Generating...' : 'Generate Summary'}
-      </button>
+      <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-6 shadow-sm space-y-5">
+        {/* Timeframe selection */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
+              From
+            </label>
+            <input
+              type="date"
+              value={timeframeStart}
+              onChange={e => setTimeframeStart(e.target.value)}
+              className="w-full border border-gray-200 dark:border-slate-600 rounded-lg p-2.5 text-sm text-gray-800 dark:text-slate-200 bg-gray-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-slate-600 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
+              To
+            </label>
+            <input
+              type="date"
+              value={timeframeEnd}
+              onChange={e => setTimeframeEnd(e.target.value)}
+              className="w-full border border-gray-200 dark:border-slate-600 rounded-lg p-2.5 text-sm text-gray-800 dark:text-slate-200 bg-gray-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-slate-600 transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Optional instructions */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
+            Additional instructions (optional)
+          </label>
+          <textarea
+            value={userInstructions}
+            onChange={e => setUserInstructions(e.target.value)}
+            placeholder="e.g. Focus on the Q2 product launch. Include leadership contributions."
+            rows={3}
+            className="w-full border border-gray-200 dark:border-slate-600 rounded-lg p-3 text-sm text-gray-800 dark:text-slate-200 bg-gray-50 dark:bg-slate-700 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-slate-600 transition-colors resize-none"
+          />
+        </div>
+
+        <button
+          onClick={handleGenerate}
+          disabled={!timeframeStart || !timeframeEnd || loading}
+          className="w-full py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
+        >
+          {loading ? 'Generating...' : 'Generate Summary'}
+        </button>
+      </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800 text-sm font-medium mb-1">Error generating summary</p>
-          <p className="text-red-700 text-sm">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl p-4">
+          <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
         </div>
       )}
 
       {loading && (
-        <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-brand-500 rounded-full animate-bounce"></div>
-            <p className="text-sm text-gray-600">Generating your summary...</p>
-          </div>
+        <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-5 shadow-sm space-y-3">
+          <p className="text-sm text-gray-500 dark:text-slate-400">Generating your summary...</p>
           <div className="space-y-2">
             <SkeletonText className="h-4" />
             <SkeletonText className="h-4 w-5/6" />
@@ -124,21 +123,21 @@ export default function SummaryPage() {
 
       {/* Summary output */}
       {summary && !loading && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold">Your Summary</h2>
-            <div className="flex gap-2">
+        <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">Your Summary</h2>
+            <div className="flex gap-3">
               <button
                 onClick={() => navigator.clipboard.writeText(summary)}
-                className="text-sm text-brand-500 hover:underline"
+                className="text-xs text-gray-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
               >
-                📋 Copy
+                Copy to clipboard
               </button>
               <a
                 href="/summaries"
-                className="text-sm text-brand-500 hover:underline"
+                className="text-xs text-gray-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
               >
-                📚 View all
+                View all summaries →
               </a>
             </div>
           </div>
@@ -146,30 +145,27 @@ export default function SummaryPage() {
             value={summary}
             onChange={e => setSummary(e.target.value)}
             rows={16}
-            className="w-full border border-gray-300 rounded-lg p-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none font-mono bg-white"
+            className="w-full border border-gray-200 dark:border-slate-600 rounded-lg p-4 text-sm text-gray-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none bg-gray-50 dark:bg-slate-700"
           />
-          <p className="text-xs text-gray-400">
-            You can edit this summary directly above before copying or sharing it.
-          </p>
-          <button
-            onClick={handleGenerate}
-            className="text-sm text-brand-500 hover:underline"
-          >
-            🔄 Regenerate with different instructions →
-          </button>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-400 dark:text-slate-500">You can edit this summary before copying.</p>
+            <button
+              onClick={handleGenerate}
+              className="text-xs text-brand-500 dark:text-brand-400 hover:text-brand-600 transition-colors"
+            >
+              Regenerate →
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Empty state - no summary generated yet */}
+      {/* Empty state */}
       {!summary && !loading && !error && (
-        <div className="text-center py-12 bg-gradient-to-br from-brand-50 to-gray-50 rounded-xl border border-brand-100">
-          <div className="text-4xl mb-3">✨</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to generate?</h3>
-          <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+        <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm">
+          <div className="text-3xl mb-3">✨</div>
+          <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100 mb-2">Ready to generate?</h3>
+          <p className="text-gray-500 dark:text-slate-400 text-sm max-w-sm mx-auto">
             Select a timeframe above and click "Generate Summary" to create your performance review from your check-ins.
-          </p>
-          <p className="text-sm text-gray-500">
-            💡 Tip: Make sure you have check-ins in the selected timeframe first.
           </p>
         </div>
       )}

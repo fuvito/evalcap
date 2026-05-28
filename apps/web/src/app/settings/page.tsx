@@ -4,17 +4,23 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Nav } from '@/components/nav'
 import { logger } from '@/lib/logger'
+import { applyTheme } from '@/components/theme-provider'
+
+type ThemeOption = 'light' | 'dark' | 'system'
 
 export default function SettingsPage() {
   const router = useRouter()
 
   const [defaultCheckInType, setDefaultCheckInType] = useState<'daily' | 'weekly'>('weekly')
+  const [theme, setTheme] = useState<ThemeOption>('system')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
+    const stored = (localStorage.getItem('theme') || 'system') as ThemeOption
+    setTheme(stored)
     loadSettings()
   }, [])
 
@@ -29,7 +35,6 @@ export default function SettingsPage() {
         return
       }
 
-      // Set the default check-in type if it exists
       if (data.profile.default_check_in_type) {
         setDefaultCheckInType(data.profile.default_check_in_type)
       }
@@ -39,6 +44,12 @@ export default function SettingsPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  function handleThemeChange(newTheme: ThemeOption) {
+    setTheme(newTheme)
+    localStorage.setItem('theme', newTheme)
+    applyTheme(newTheme)
   }
 
   async function handleSave() {
@@ -66,7 +77,6 @@ export default function SettingsPage() {
       setSuccess(true)
       logger.info('Settings saved', { defaultCheckInType }, 'settings')
 
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
       logger.error('Error saving settings', err, 'settings')
@@ -81,38 +91,71 @@ export default function SettingsPage() {
       <>
         <Nav />
         <div className="max-w-3xl mx-auto p-4 md:p-8">
-          <div className="h-8 bg-gray-200 rounded w-1/4 animate-pulse"></div>
+          <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded w-1/4 animate-pulse"></div>
         </div>
       </>
     )
   }
 
+  const themeOptions: { value: ThemeOption; label: string; description: string }[] = [
+    { value: 'light', label: 'Light', description: 'Always use light mode' },
+    { value: 'dark', label: 'Dark', description: 'Always use dark mode' },
+    { value: 'system', label: 'System', description: 'Follow your device setting' },
+  ]
+
   return (
     <>
       <Nav />
       <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
-        <h1 className="text-3xl font-bold text-brand-700">Settings</h1>
+        <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Settings</h1>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-800 text-sm">{error}</p>
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <p className="text-red-800 dark:text-red-400 text-sm">{error}</p>
           </div>
         )}
 
         {success && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className="text-green-800 text-sm">✓ Settings saved successfully</p>
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+            <p className="text-green-800 dark:text-green-400 text-sm">✓ Settings saved successfully</p>
           </div>
         )}
 
+        {/* Appearance Section */}
+        <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">Appearance</h2>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Theme</label>
+          <div className="grid grid-cols-3 gap-3">
+            {themeOptions.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => handleThemeChange(opt.value)}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-colors text-left ${
+                  theme === opt.value
+                    ? 'border-brand-500 bg-brand-50 dark:bg-slate-700'
+                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'
+                }`}
+              >
+                <span className="text-lg">
+                  {opt.value === 'light' ? '☀️' : opt.value === 'dark' ? '🌙' : '💻'}
+                </span>
+                <span className={`text-sm font-medium ${theme === opt.value ? 'text-brand-600 dark:text-brand-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                  {opt.label}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-slate-400 text-center">{opt.description}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Preferences Section */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-6">
+        <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-6 shadow-sm space-y-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Check-in Preferences</h2>
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">Check-in Preferences</h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
                   Default Check-in Type
                 </label>
                 <div className="flex gap-4">
@@ -126,9 +169,9 @@ export default function SettingsPage() {
                       disabled={saving}
                       className="w-4 h-4 text-brand-500"
                     />
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-gray-700 dark:text-slate-300">
                       Daily
-                      <p className="text-xs text-gray-500">Quick daily reflections</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400">Quick daily reflections</p>
                     </span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -141,46 +184,35 @@ export default function SettingsPage() {
                       disabled={saving}
                       className="w-4 h-4 text-brand-500"
                     />
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-gray-700 dark:text-slate-300">
                       Weekly
-                      <p className="text-xs text-gray-500">In-depth weekly summaries</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400">In-depth weekly summaries</p>
                     </span>
                   </label>
                 </div>
-                <p className="text-xs text-gray-500 mt-3">
+                <p className="text-xs text-gray-500 dark:text-slate-400 mt-3">
                   This will be the default selection when you create a new check-in. You can always change it for individual check-ins.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex gap-2 pt-4 border-t border-gray-200">
+          <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-slate-700">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 py-2.5 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
             >
               {saving ? 'Saving...' : 'Save Preferences'}
             </button>
             <button
               onClick={() => router.back()}
               disabled={saving}
-              className="flex-1 py-2.5 border border-gray-300 text-gray-600 rounded-lg font-medium hover:bg-gray-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 py-2.5 border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-slate-700 disabled:cursor-not-allowed transition-colors text-sm"
             >
               Cancel
             </button>
           </div>
-        </div>
-
-        {/* Future settings placeholder */}
-        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-4">
-          <h3 className="font-semibold text-gray-700">Coming Soon</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li>• Theme preferences (light/dark mode)</li>
-            <li>• Email notification settings</li>
-            <li>• Privacy and data export options</li>
-            <li>• Account management and deletion</li>
-          </ul>
         </div>
       </div>
     </>
