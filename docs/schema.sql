@@ -19,12 +19,15 @@ $$ LANGUAGE plpgsql;
 -- profiles  (extends auth.users)
 -- ─────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS profiles (
-  id          UUID        REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  email       TEXT        NOT NULL,
-  full_name   TEXT,
-  role        TEXT,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id            UUID        REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  email         TEXT        NOT NULL,
+  full_name     TEXT,
+  role          TEXT,
+  job_title     TEXT,
+  department    TEXT,
+  manager_name  TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;

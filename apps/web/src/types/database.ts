@@ -11,6 +11,9 @@ export type Database = {
           email: string
           full_name: string | null
           role: string | null
+          job_title: string | null
+          department: string | null
+          manager_name: string | null
           created_at: string
           updated_at: string
         }
@@ -19,10 +22,16 @@ export type Database = {
           email: string
           full_name?: string | null
           role?: string | null
+          job_title?: string | null
+          department?: string | null
+          manager_name?: string | null
         }
         Update: {
           full_name?: string | null
           role?: string | null
+          job_title?: string | null
+          department?: string | null
+          manager_name?: string | null
         }
         Relationships: []
       }
