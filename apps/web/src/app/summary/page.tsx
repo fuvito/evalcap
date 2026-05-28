@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Nav } from '@/components/nav'
 import { SkeletonText } from '@/components/skeleton'
+import type { PerformanceCycle } from '@/types/database'
 
 export default function SummaryPage() {
   const params = useSearchParams()
@@ -15,6 +16,13 @@ export default function SummaryPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const [cycles, setCycles] = useState<PerformanceCycle[]>([])
+
+  useEffect(() => {
+    fetch('/api/cycles').then(r => r.json()).then(d => {
+      if (d.cycles) setCycles(d.cycles.filter((c: PerformanceCycle) => c.status === 'active'))
+    }).catch(() => {})
+  }, [])
 
   async function handleGenerate() {
     if (!timeframeStart || !timeframeEnd) return
@@ -86,6 +94,26 @@ export default function SummaryPage() {
         </div>
 
         <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-6 shadow-sm space-y-5">
+          {cycles.length > 0 && (
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
+                Fill from cycle (optional)
+              </label>
+              <select
+                defaultValue=""
+                onChange={e => {
+                  const cycle = cycles.find(c => c.id === e.target.value)
+                  if (cycle) { setTimeframeStart(cycle.start_date); setTimeframeEnd(cycle.end_date) }
+                }}
+                className="w-full border border-gray-200 dark:border-slate-600 rounded-lg p-2.5 text-sm text-gray-800 dark:text-slate-200 bg-gray-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors"
+              >
+                <option value="">Select a cycle…</option>
+                {cycles.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">

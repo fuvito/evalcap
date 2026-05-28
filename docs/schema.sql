@@ -161,6 +161,54 @@ CREATE INDEX IF NOT EXISTS summaries_user_created_idx
 
 
 -- ─────────────────────────────────────────────────────────────
+-- performance_cycles
+-- ─────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS performance_cycles (
+  id          UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id     UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  name        TEXT        NOT NULL,
+  start_date  DATE        NOT NULL,
+  end_date    DATE        NOT NULL,
+  status      TEXT        NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'archived')),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE performance_cycles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own cycles"   ON performance_cycles;
+DROP POLICY IF EXISTS "Users can insert own cycles" ON performance_cycles;
+DROP POLICY IF EXISTS "Users can update own cycles" ON performance_cycles;
+DROP POLICY IF EXISTS "Users can delete own cycles" ON performance_cycles;
+
+CREATE POLICY "Users can view own cycles"
+  ON performance_cycles FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own cycles"
+  ON performance_cycles FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own cycles"
+  ON performance_cycles FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own cycles"
+  ON performance_cycles FOR DELETE
+  USING (auth.uid() = user_id);
+
+CREATE OR REPLACE TRIGGER performance_cycles_updated_at
+  BEFORE UPDATE ON performance_cycles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON performance_cycles TO authenticated;
+
+CREATE INDEX IF NOT EXISTS performance_cycles_user_idx
+  ON performance_cycles(user_id, created_at DESC);
+
+
+-- ─────────────────────────────────────────────────────────────
 -- Auto-create profile row on signup
 -- ─────────────────────────────────────────────────────────────
 -- SECURITY DEFINER so the trigger runs as the owner and bypasses RLS.

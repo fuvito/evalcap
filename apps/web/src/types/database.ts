@@ -62,6 +62,32 @@ export type Database = {
         }
         Relationships: []
       }
+      performance_cycles: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          start_date: string
+          end_date: string
+          status: 'active' | 'archived'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          name: string
+          start_date: string
+          end_date: string
+          status?: 'active' | 'archived'
+        }
+        Update: {
+          name?: string
+          start_date?: string
+          end_date?: string
+          status?: 'active' | 'archived'
+        }
+        Relationships: []
+      }
       summaries: {
         Row: {
           id: string
@@ -106,3 +132,4 @@ export type Database = {
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type JournalEntry = Database['public']['Tables']['journal_entries']['Row']
 export type Summary = Database['public']['Tables']['summaries']['Row']
+export type PerformanceCycle = Database['public']['Tables']['performance_cycles']['Row']

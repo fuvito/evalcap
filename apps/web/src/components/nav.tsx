@@ -21,6 +21,7 @@ export function Nav() {
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/checkin', label: 'Check-in' },
     { href: '/history', label: 'History' },
+    { href: '/cycles', label: 'Cycles' },
     { href: '/summary', label: 'Summary' },
     { href: '/summaries', label: 'Summaries' },
   ] as const
