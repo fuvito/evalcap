@@ -102,7 +102,10 @@ export default function SummaryPage() {
       </button>
 
       {error && (
-        <p className="text-red-500 text-sm">{error}</p>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800 text-sm font-medium mb-1">Error generating summary</p>
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
       )}
 
       {loading && (
@@ -146,6 +149,20 @@ export default function SummaryPage() {
           >
             Regenerate with different instructions →
           </button>
+        </div>
+      )}
+
+      {/* Empty state - no summary generated yet */}
+      {!summary && !loading && !error && (
+        <div className="text-center py-12 bg-gradient-to-br from-brand-50 to-gray-50 rounded-xl border border-brand-100">
+          <div className="text-4xl mb-3">✨</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to generate?</h3>
+          <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+            Select a timeframe above and click "Generate Summary" to create your performance review from your check-ins.
+          </p>
+          <p className="text-sm text-gray-500">
+            💡 Tip: Make sure you have check-ins in the selected timeframe first.
+          </p>
         </div>
       )}
     </div>

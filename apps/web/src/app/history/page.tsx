@@ -31,7 +31,7 @@ export default async function HistoryPage() {
         {entries && entries.length > 0 ? (
           <div className="space-y-3">
             {entries.map(entry => (
-              <div key={entry.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
+              <div key={entry.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-2 hover:border-brand-200 transition-colors">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-brand-500 uppercase tracking-wide">
                     {entry.check_in_type}
@@ -52,10 +52,17 @@ export default async function HistoryPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-gray-50 rounded-xl">
-            <p className="text-gray-500 mb-4">No check-ins yet.</p>
-            <Link href="/checkin" className="text-brand-500 font-medium hover:underline">
-              Start your first check-in →
+          <div className="text-center py-16 bg-gradient-to-br from-brand-50 to-gray-50 rounded-xl border border-brand-100">
+            <div className="text-4xl mb-3">📚</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Your journal is empty</h3>
+            <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+              Begin your journey by creating your first check-in. Regular reflection is the foundation of great performance reviews.
+            </p>
+            <Link
+              href="/checkin"
+              className="inline-block px-6 py-3 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors"
+            >
+              + Start Your First Check-in
             </Link>
           </div>
         )}

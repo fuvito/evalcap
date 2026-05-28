@@ -141,19 +141,38 @@ export default function ProfilePage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-gray-600 text-sm">Total Check-ins</p>
-            <p className="text-2xl font-bold text-brand-700">{stats.entryCount}</p>
+          <div className="bg-gradient-to-br from-brand-50 to-blue-50 p-4 rounded-lg border border-brand-100">
+            <p className="text-gray-600 text-sm font-medium">Total Check-ins</p>
+            <p className="text-3xl font-bold text-brand-700 mt-1">{stats.entryCount}</p>
+            {stats.entryCount === 0 && (
+              <p className="text-xs text-gray-500 mt-2">Start checking in to build your record</p>
+            )}
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-gray-600 text-sm">Last Check-in</p>
-            <p className="text-sm font-medium text-gray-700">
+          <div className="bg-gradient-to-br from-emerald-50 to-green-50 p-4 rounded-lg border border-emerald-100">
+            <p className="text-gray-600 text-sm font-medium">Last Check-in</p>
+            <p className="text-sm font-medium text-gray-700 mt-1">
               {stats.lastCheckIn
                 ? new Date(stats.lastCheckIn).toLocaleDateString()
                 : 'Never'}
             </p>
+            {!stats.lastCheckIn && (
+              <p className="text-xs text-gray-500 mt-2">Create your first one today</p>
+            )}
           </div>
         </div>
+
+        {/* First-time user guidance */}
+        {stats.entryCount === 0 && (
+          <div className="bg-blue-50 border-l-4 border-brand-500 rounded p-4">
+            <p className="text-sm text-gray-700 mb-2">
+              <span className="font-semibold">Welcome to EvalCap!</span> Start by completing your profile below, then head to{' '}
+              <Link href="/checkin" className="text-brand-500 font-medium hover:underline">
+                Check-in
+              </Link>
+              {' '}to create your first journal entry.
+            </p>
+          </div>
+        )}
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 

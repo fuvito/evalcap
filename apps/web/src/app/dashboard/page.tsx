@@ -88,10 +88,17 @@ export default async function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-gray-50 rounded-xl">
-            <p className="text-gray-500 mb-4">No check-ins yet. Start capturing your wins!</p>
-            <Link href="/checkin" className="text-brand-500 font-medium hover:underline">
-              Start your first check-in →
+          <div className="text-center py-16 bg-gradient-to-br from-brand-50 to-gray-50 rounded-xl border border-brand-100">
+            <div className="text-4xl mb-3">📝</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No check-ins yet</h3>
+            <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+              Start capturing your achievements and progress. Check-ins help you reflect on your work and build material for performance reviews.
+            </p>
+            <Link
+              href="/checkin"
+              className="inline-block px-6 py-3 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors"
+            >
+              + Create Your First Check-in
             </Link>
           </div>
         )}

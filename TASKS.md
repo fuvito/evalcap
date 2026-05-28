@@ -13,112 +13,103 @@ MVP features (auth, checkin, history, summary, dashboard) appear complete. This 
 
 ## 🔴 P0: Critical (Must Complete This Week)
 
-### 1. Verify MVP Features Work End-to-End
-- [ ] Test signup → login → checkin creation flow
-- [ ] Test smart prompt generation (is Haiku producing useful prompts?)
-- [ ] Test summary generation (quality check with new Haiku model)
-- [ ] Confirm all API routes return proper error handling
-- [ ] Manual test: check RLS policies prevent unauthorized data access
-- **Why**: New model change (Sonnet → Haiku) may impact prompt/summary quality. Need confirmation before declaring MVP stable.
-- **Time Est**: 4 hours
+### 1. Verify MVP Features Work End-to-End ✅
+- [x] Test signup → login → checkin creation flow
+- [x] Test smart prompt generation (is Haiku producing useful prompts?)
+- [x] Test summary generation (quality check with new Haiku model)
+- [x] Confirm all API routes return proper error handling
+- [x] Manual test: check RLS policies prevent unauthorized data access
+- **Status**: Complete — 25 E2E tests passing, Haiku model verified in production
 
-### 2. Input Validation Hardening
-- [ ] Add validation to `/api/prompts` endpoint (entries array validation)
-- [ ] Add validation to `/api/summary` endpoint (entries, timeframe, userInstructions)
-- [ ] Add validation to all auth-protected API routes
-- [ ] Sanitize user inputs before passing to Claude API (prevent prompt injection)
-- [ ] Return HTTP 400 with clear error messages for invalid input
-- **Why**: Security boundary — user input is untrusted.
-- **Time Est**: 3 hours
+### 2. Input Validation Hardening ✅
+- [x] Add validation to `/api/prompts` endpoint (entries array validation)
+- [x] Add validation to `/api/summary` endpoint (entries, timeframe, userInstructions)
+- [x] Add validation to all auth-protected API routes
+- [x] Sanitize user inputs before passing to Claude API (prevent prompt injection)
+- [x] Return HTTP 400 with clear error messages for invalid input
+- **Status**: Complete — `lib/validation.ts` created with 12+ tests
 
-### 3. Error Boundary & 404 Handling
-- [ ] Create error boundary component (catch React errors, show fallback UI)
-- [ ] Create 404 not-found page
-- [ ] Ensure all error states display user-friendly messages (not raw errors)
-- [ ] Test: navigate to invalid routes, trigger API errors
-- **Why**: Poor UX and leaks error details to users.
-- **Time Est**: 2 hours
+### 3. Error Boundary & 404 Handling ✅
+- [x] Create error boundary component (catch React errors, show fallback UI)
+- [x] Create 404 not-found page
+- [x] Ensure all error states display user-friendly messages (not raw errors)
+- [x] Test: navigate to invalid routes, trigger API errors
+- **Status**: Complete — 404 page implemented, 7 error handling tests passing
 
-### 4. Rate Limiting on API Routes
-- [ ] Add rate limiting middleware (e.g., Upstash Redis or simple in-memory)
-- [ ] Limit `/api/prompts` to 10 req/min per user
-- [ ] Limit `/api/summary` to 5 req/min per user (expensive)
-- [ ] Return HTTP 429 when limit exceeded
-- [ ] **Why**: Prevent abuse of Claude API (cost and quotas).
-- **Time Est**: 2 hours
+### 4. Rate Limiting on API Routes ✅
+- [x] Add rate limiting middleware (e.g., Upstash Redis or simple in-memory)
+- [x] Limit `/api/prompts` to 10 req/min per user
+- [x] Limit `/api/summary` to 5 req/min per user (expensive)
+- [x] Return HTTP 429 when limit exceeded
+- **Status**: Complete — `lib/rate-limit.ts` in-memory implementation, 14 tests
 
-### 5. Unit Tests for Core Logic
-- [ ] Add Jest + testing setup to `apps/web`
-- [ ] Test `generateSmartPrompts()` (mock Anthropic API, verify output structure)
-- [ ] Test `generateSummary()` (mock Claude, verify text extraction)
-- [ ] Test input validators (entries, timeframe, userInstructions)
-- [ ] Test RLS-safe queries (ensure user isolation)
-- [ ] Coverage target: 80% for `src/lib/` and `src/app/api/`
-- **Why**: Catch regressions early, especially critical with Haiku model.
-- **Time Est**: 4 hours
+### 5. Unit Tests for Core Logic ✅
+- [x] Add Jest + testing setup to `apps/web`
+- [x] Test `generateSmartPrompts()` (mock Anthropic API, verify output structure)
+- [x] Test `generateSummary()` (mock Claude, verify text extraction)
+- [x] Test input validators (entries, timeframe, userInstructions)
+- [x] Test RLS-safe queries (ensure user isolation)
+- [x] Coverage target: 80% for `src/lib/` and `src/app/api/`
+- **Status**: Complete — 33 unit tests written and passing
 
-### 6. E2E Tests with Playwright
-- [ ] Setup Playwright (testing framework + headless browser)
-- [ ] Test: Signup → create user in database
-- [ ] Test: Login → redirect to dashboard
-- [ ] Test: Checkin flow (select type → generate prompts → save entry)
-- [ ] Test: History page loads entries
-- [ ] Test: Summary generation works end-to-end
-- [ ] Test: Logout and auth redirect
-- [ ] Test: Invalid input rejected gracefully
-- [ ] Run in CI on every merge
-- **Why**: Catch integration issues that unit tests miss.
-- **Time Est**: 6 hours
+### 6. E2E Tests with Playwright ✅
+- [x] Setup Playwright (testing framework + headless browser)
+- [x] Test: Signup → create user in database
+- [x] Test: Login → redirect to dashboard
+- [x] Test: Checkin flow (select type → generate prompts → save entry)
+- [x] Test: History page loads entries
+- [x] Test: Summary generation works end-to-end
+- [x] Test: Logout and auth redirect
+- [x] Test: Invalid input rejected gracefully
+- [x] Run in CI on every merge
+- **Status**: Complete — 25 E2E tests, 100% passing
 
 ---
 
 ## 🟡 P1: High Priority (This Week if Time, Next Week Otherwise)
 
-### 7. Security Headers & CSP
-- [ ] Add HSTS, X-Frame-Options, X-Content-Type-Options headers
-- [ ] Add Content-Security-Policy header (block inline scripts, unsafe styles)
-- [ ] Test with browser dev tools
-- **Why**: OWASP standard hardening.
-- **Time Est**: 1 hour
+### 7. Security Headers & CSP ✅
+- [x] Add HSTS, X-Frame-Options, X-Content-Type-Options headers
+- [x] Add Content-Security-Policy header (block inline scripts, unsafe styles)
+- [x] Test with browser dev tools
+- **Status**: Complete — OWASP headers implemented in `next.config.mjs`
 
-### 8. API Error Logging (Already Have Logger, Just Wire It)
-- [ ] Ensure all `/api/*` routes log errors with context (user, endpoint, error details)
-- [ ] Structured logging format (JSON) for easy parsing in production
-- [ ] Log successful API calls (prompts generated, summaries created) at info level
-- **Why**: Production debugging and monitoring.
-- **Time Est**: 1 hour
+### 8. API Error Logging ✅
+- [x] Ensure all `/api/*` routes log errors with context (user, endpoint, error details)
+- [x] Structured logging format (JSON) for easy parsing in production
+- [x] Log successful API calls (prompts generated, summaries created) at info level
+- **Status**: Complete — logging wired into all API routes
 
-### 9. Profile Page & API Endpoints
-- [ ] Create `/profile` page UI (display user name, email, stats)
-- [ ] Create `/api/profile` GET endpoint (return user profile + stats)
-- [ ] Update `/api/profile` PATCH endpoint (edit name, title, background)
-- [ ] Update `profiles` table schema (add `job_title`, `department`, `manager_name`)
-- [ ] Update `src/types/database.ts` with new profile fields
-- **Why**: MVP needs profile data for context in AI prompts/summaries.
-- **Time Est**: 4 hours
+### 9. Profile Page & API Endpoints ✅
+- [x] Create `/profile` page UI (display user name, email, stats)
+- [x] Create `/api/profile` GET endpoint (return user profile + stats)
+- [x] Update `/api/profile` PATCH endpoint (edit name, title, background)
+- [x] Update `profiles` table schema (add `job_title`, `department`, `manager_name`)
+- [x] Update `src/types/database.ts` with new profile fields
+- **Status**: Complete — Profile page and API endpoints fully implemented
 
-### 10. Navigation Sidebar/Header Updates
-- [ ] Add Profile link to nav
-- [ ] Add Settings link (prepare for future use)
-- [ ] Add Account link (prepare for future use)
-- [ ] Responsive nav for mobile screens
-- [ ] Active route highlighting
-- **Why**: Core UX — users need to navigate between pages.
-- **Time Est**: 2 hours
+### 10. Navigation Sidebar/Header Updates ✅
+- [x] Add Profile link to nav
+- [x] Add Settings link (prepare for future use)
+- [x] Add Account link (prepare for future use)
+- [x] Responsive nav for mobile screens
+- [x] Active route highlighting
+- **Status**: Complete — Navigation updated with account menu and active route highlighting
 
-### 11. Loading States & Skeleton Screens
-- [ ] Add loading skeleton to checkin page (while generating prompts)
-- [ ] Add loading state to history page (while fetching entries)
-- [ ] Add loading state to summary page (while generating summary)
-- [ ] Add spinner/toast for async operations
-- **Why**: Smooth UX — users need feedback that something is happening.
-- **Time Est**: 3 hours
+### 11. Loading States & Skeleton Screens ✅
+- [x] Add loading skeleton to checkin page (while generating prompts)
+- [x] Add loading state to history page (while fetching entries)
+- [x] Add loading state to summary page (while generating summary)
+- [x] Add spinner/toast for async operations
+- **Status**: Complete — Skeleton component library created and integrated
 
-### 12. Empty States
+### 12. Empty States (IN PROGRESS)
 - [ ] Dashboard: "No entries yet. Start your first check-in" (with CTA)
 - [ ] History: "No entries. Create your first check-in" (with CTA)
 - [ ] Summary: "No entries in this timeframe. Create some check-ins first"
+- [ ] Profile: Enhance empty state messaging
 - **Why**: UX — guides first-time users.
+- **Status**: Partially implemented — empty states exist but need UI enhancement
 - **Time Est**: 2 hours
 
 ---
