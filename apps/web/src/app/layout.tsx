@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
+import { Footer } from '@/components/footer'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
@@ -28,9 +29,10 @@ export default function RootLayout({
           } catch(e) {}
         `}} />
       </head>
-      <body className={`${inter.variable} font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100`}>
+      <body className={`${inter.variable} font-sans antialiased bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col min-h-screen`}>
         <ThemeProvider>
           {children}
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
