@@ -136,7 +136,7 @@ export default function CheckInPage() {
         <div className="space-y-5">
           {prompts.map((prompt, i) => (
             <div key={i} className="space-y-2">
-              <label className="block text-base font-bold text-gray-800 mb-2">
+              <label className="block text-base font-bold text-brand-600 mb-3 p-2 bg-blue-50 rounded">
                 {prompt}
               </label>
               <textarea
