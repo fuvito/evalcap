@@ -103,26 +103,27 @@ MVP features (auth, checkin, history, summary, dashboard) appear complete. This 
 - [x] Add spinner/toast for async operations
 - **Status**: Complete — Skeleton component library created and integrated
 
-### 12. Empty States (IN PROGRESS)
-- [ ] Dashboard: "No entries yet. Start your first check-in" (with CTA)
-- [ ] History: "No entries. Create your first check-in" (with CTA)
-- [ ] Summary: "No entries in this timeframe. Create some check-ins first"
-- [ ] Profile: Enhance empty state messaging
-- **Why**: UX — guides first-time users.
-- **Status**: Partially implemented — empty states exist but need UI enhancement
-- **Time Est**: 2 hours
+### 12. Empty States ✅
+- [x] Dashboard: "No entries yet. Start your first check-in" (with CTA)
+- [x] History: "No entries. Create your first check-in" (with CTA)
+- [x] Summary: "No entries in this timeframe. Create some check-ins first"
+- [x] Profile: Enhance empty state messaging with first-time user guidance
+- **Status**: Complete — Enhanced empty states on all pages with emojis, descriptions, and CTAs
 
 ---
 
 ## 🟠 P2: Medium Priority (Next Sprint, ~1-2 Weeks)
 
-### 13. Edit & Delete Check-Ins
-- [ ] Add `/history/[id]/edit` page
-- [ ] Wire up `PATCH /api/entries/[id]` endpoint
-- [ ] Wire up `DELETE /api/entries/[id]` endpoint (with soft delete or hard delete?)
+### 13. Edit & Delete Check-Ins (IN PROGRESS)
+- [ ] Add `/history/[id]/edit` page (client component)
+- [ ] Wire up `PATCH /api/entries/[id]` endpoint (update content, preserve metadata)
+- [ ] Wire up `DELETE /api/entries/[id]` endpoint (hard delete for MVP, soft delete for future)
 - [ ] Add confirmation dialog before delete
-- [ ] Test RLS policies work for edit/delete
-- **Why**: Users need to fix typos or change entries.
+- [ ] Test RLS policies work for edit/delete (user can only edit/delete own entries)
+- [ ] Update history page to show edit link for each entry
+- [ ] Test: edit updates entry, delete removes from history
+- **Why**: Users need to fix typos or remove entries.
+- **Status**: Starting implementation
 - **Time Est**: 4 hours
 
 ### 14. Save & View Summaries
