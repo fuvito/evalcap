@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Nav } from '@/components/nav'
@@ -17,34 +17,56 @@ export default function CheckInPage() {
   const [loading, setLoading] = useState(false)
   const [loadingPrompts, setLoadingPrompts] = useState(true)
   const [saving, setSaving] = useState(false)
+  const initializedRef = useRef(false)
 
-  // Load default check-in type from profile
+  // Load default check-in type and initial prompts on mount only
   useEffect(() => {
-    loadDefaultCheckInType()
-  }, [])
+    const initializePage = async () => {
+      try {
+        const res = await fetch('/api/profile')
+        const data = await res.json()
 
-  async function loadDefaultCheckInType() {
-    try {
-      const res = await fetch('/api/profile')
-      const data = await res.json()
-
-      if (res.ok && data.profile?.default_check_in_type) {
-        setCheckInType(data.profile.default_check_in_type)
+        if (res.ok && data.profile?.default_check_in_type) {
+          setCheckInType(data.profile.default_check_in_type)
+        }
+      } catch (err) {
+        logger.debug('Could not load default check-in type', err, 'checkin')
       }
-    } catch (err) {
-      logger.debug('Could not load default check-in type', err, 'checkin')
-    }
-  }
 
-  useEffect(() => {
-    loadPrompts()
-  }, [checkInType])
+      // Load initial prompts
+      await loadPrompts()
+      initializedRef.current = true
+    }
+
+    if (!initializedRef.current) {
+      initializePage()
+    }
+  }, [])
 
   const FALLBACK_PROMPTS = [
     'What did you accomplish since your last check-in?',
     'What are you currently working on?',
     'Any blockers or upcoming plans to note?',
   ]
+
+  function handleCheckInTypeChange(newType: 'daily' | 'weekly') {
+    if (hasResponses) {
+      if (!window.confirm('Changing the check-in type will delete your current answers. Continue?')) {
+        return
+      }
+    }
+    setCheckInType(newType)
+    // Note: We don't regenerate prompts when type changes, user must click Refresh Prompts
+  }
+
+  function handleRefreshPrompts() {
+    if (hasResponses) {
+      if (!window.confirm('Refreshing prompts will delete all your current answers. Continue?')) {
+        return
+      }
+    }
+    loadPrompts()
+  }
 
   async function loadPrompts() {
     setLoadingPrompts(true)
@@ -110,7 +132,7 @@ export default function CheckInPage() {
           {(['daily', 'weekly'] as const).map(type => (
             <button
               key={type}
-              onClick={() => setCheckInType(type)}
+              onClick={() => handleCheckInTypeChange(type)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium capitalize transition-colors ${
                 checkInType === type
                   ? 'bg-brand-500 text-white'
@@ -160,11 +182,12 @@ export default function CheckInPage() {
           {saving ? 'Saving...' : 'Save Check-in'}
         </button>
         <button
-          onClick={loadPrompts}
+          onClick={handleRefreshPrompts}
           disabled={loadingPrompts}
           className="px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+          title="Refreshing will delete your current answers"
         >
-          Refresh prompts
+          🔄 Refresh prompts
         </button>
       </div>
     </div>
