@@ -101,7 +101,7 @@ export default function ProfilePage() {
     return (
       <>
         <Nav />
-        <div className="max-w-3xl mx-auto px-4 md:px-8 py-8">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded w-1/4"></div>
             <div className="h-40 bg-gray-200 dark:bg-slate-700 rounded"></div>
@@ -115,7 +115,7 @@ export default function ProfilePage() {
     return (
       <>
         <Nav />
-        <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 text-center">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 py-8 text-center">
           <p className="text-red-500 dark:text-red-400">{error || 'Failed to load profile'}</p>
         </div>
       </>
@@ -127,7 +127,7 @@ export default function ProfilePage() {
   return (
     <>
       <Nav />
-      <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 py-8 space-y-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Profile</h1>
           {!editing && (

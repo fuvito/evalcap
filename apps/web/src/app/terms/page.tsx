@@ -9,7 +9,7 @@ export default function TermsPage() {
   return (
     <>
       <Nav />
-      <main className="max-w-3xl mx-auto px-4 md:px-8 py-12">
+      <main className="max-w-5xl mx-auto px-4 md:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-slate-800 dark:text-slate-100">Terms of Service</h1>
           <p className="text-sm text-gray-400 dark:text-slate-500 mt-2">Last updated: May 28, 2026</p>
