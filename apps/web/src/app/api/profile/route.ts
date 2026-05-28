@@ -76,7 +76,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { full_name, job_title, department, manager_name } = body
+    const { full_name, job_title, department, manager_name, default_check_in_type, onboarding_completed } = body
 
     // Validate inputs
     try {
@@ -84,6 +84,13 @@ export async function PATCH(request: NextRequest) {
       validateOptionalString(job_title, 'job_title', 100)
       validateOptionalString(department, 'department', 100)
       validateOptionalString(manager_name, 'manager_name', 100)
+
+      // Validate check-in type if provided
+      if (default_check_in_type && !['daily', 'weekly'].includes(default_check_in_type)) {
+        throw new ValidationException([
+          { field: 'default_check_in_type', message: 'Must be "daily" or "weekly"' },
+        ])
+      }
     } catch (err) {
       if (err instanceof ValidationException) {
         logger.warn('Validation failed on PATCH /api/profile', { userId: user.id, errors: err.errors }, 'api')
@@ -97,15 +104,19 @@ export async function PATCH(request: NextRequest) {
 
     logger.info('PATCH /api/profile', { userId: user.id }, 'api')
 
+    // Build update object with provided fields
+    const updateData: Record<string, any> = {}
+    if (full_name !== undefined) updateData.full_name = full_name
+    if (job_title !== undefined) updateData.job_title = job_title
+    if (department !== undefined) updateData.department = department
+    if (manager_name !== undefined) updateData.manager_name = manager_name
+    if (default_check_in_type !== undefined) updateData.default_check_in_type = default_check_in_type
+    if (onboarding_completed !== undefined) updateData.onboarding_completed = onboarding_completed
+
     // Update profile
     const { data: updatedProfile, error: updateError } = await supabase
       .from('profiles')
-      .update({
-        full_name: full_name ?? undefined,
-        job_title: job_title ?? undefined,
-        department: department ?? undefined,
-        manager_name: manager_name ?? undefined,
-      })
+      .update(updateData)
       .eq('id', user.id)
       .select()
       .single()

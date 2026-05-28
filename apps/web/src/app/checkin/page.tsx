@@ -18,6 +18,24 @@ export default function CheckInPage() {
   const [loadingPrompts, setLoadingPrompts] = useState(true)
   const [saving, setSaving] = useState(false)
 
+  // Load default check-in type from profile
+  useEffect(() => {
+    loadDefaultCheckInType()
+  }, [])
+
+  async function loadDefaultCheckInType() {
+    try {
+      const res = await fetch('/api/profile')
+      const data = await res.json()
+
+      if (res.ok && data.profile?.default_check_in_type) {
+        setCheckInType(data.profile.default_check_in_type)
+      }
+    } catch (err) {
+      logger.debug('Could not load default check-in type', err, 'checkin')
+    }
+  }
+
   useEffect(() => {
     loadPrompts()
   }, [checkInType])

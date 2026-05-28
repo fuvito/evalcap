@@ -135,23 +135,27 @@ MVP features (auth, checkin, history, summary, dashboard) appear complete. This 
 - [x] Types in database.ts (already done)
 - **Status**: Complete — Full summary management with view, delete, copy, regenerate
 
-### 15. Onboarding Flow (IN PROGRESS)
-- [ ] Detect first-time user (no entries, maybe a flag in profiles table)
-- [ ] Show onboarding carousel/modal on first login
-- [ ] Explain: what is EvalCap, how to use it, why journaling helps
-- [ ] Skip/done button
-- [ ] Don't show again after completion
-- **Why**: First-time UX — helps users understand the product.
-- **Status**: Starting implementation
-- **Time Est**: 3 hours
+### 15. Onboarding Flow ✅
+- [x] Detect first-time user (no entries detected on dashboard)
+- [x] Show onboarding carousel/modal on first login
+- [x] Step 1: Welcome message with Get Started CTA
+- [x] Step 2: How it works (check-ins, prompts, summaries)
+- [x] Step 3: Why journaling helps (benefits explanation)
+- [x] Skip button to bypass onboarding
+- [x] Don't show again using localStorage dismissal flag
+- [x] Navigate to check-in page on completion
+- **Status**: Complete — 3-step onboarding flow with skip option
 
-### 16. Check-In Type Preference (Settings)
-- [ ] Create `/settings` page
+### 16. Check-In Type Preference (Settings) (IN PROGRESS)
+- [ ] Create `/settings` page (client component with form)
 - [ ] Option to set default check-in type (daily vs weekly)
-- [ ] Option for theme (light/dark mode) — wire to Tailwind
-- [ ] Wire `GET/PATCH /api/settings` endpoints
-- [ ] Update `profiles` table to store these preferences
+- [ ] Add preference field to profiles table
+- [ ] Wire `GET/PATCH /api/settings` endpoints (or reuse /api/profile)
+- [ ] Save default preference to profiles table
+- [ ] Use preference in check-in page default selection
+- [ ] Add visual feedback when preference is saved
 - **Why**: User customization, improves retention.
+- **Status**: Starting implementation
 - **Time Est**: 3 hours
 
 ### 17. Mobile Responsiveness Audit
