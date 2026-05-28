@@ -137,7 +137,7 @@ export default function ViewSummaryPage() {
           value={summary.content}
           readOnly
           rows={16}
-          className="w-full border border-gray-300 rounded-lg p-4 text-sm text-gray-900 focus:outline-none resize-none font-mono bg-gray-50"
+          className="w-full border border-gray-300 rounded-lg p-4 text-sm text-gray-900 focus:outline-none resize-none font-mono bg-white"
         />
 
         {/* Action buttons */}

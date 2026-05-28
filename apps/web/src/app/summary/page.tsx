@@ -63,7 +63,7 @@ export default function SummaryPage() {
             type="date"
             value={timeframeStart}
             onChange={e => setTimeframeStart(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-gray-900 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
         <div>
@@ -74,7 +74,7 @@ export default function SummaryPage() {
             type="date"
             value={timeframeEnd}
             onChange={e => setTimeframeEnd(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-gray-900 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function SummaryPage() {
           onChange={e => setUserInstructions(e.target.value)}
           placeholder="E.g. Focus more on the Q2 product launch. Include leadership contributions."
           rows={3}
-          className="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+          className="w-full border border-gray-300 rounded-lg p-3 text-sm text-gray-900 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
         />
       </div>
 

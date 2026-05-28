@@ -185,7 +185,7 @@ export default function ProfilePage() {
               type="email"
               value={profile.email}
               disabled
-              className="w-full border border-gray-300 rounded-lg p-2.5 text-sm bg-gray-50 text-gray-600 cursor-not-allowed"
+              className="w-full border border-gray-300 rounded-lg p-2.5 text-sm bg-gray-50 text-gray-700 cursor-not-allowed placeholder-gray-500"
             />
             <p className="text-xs text-gray-400 mt-1">Email cannot be changed</p>
           </div>
@@ -198,8 +198,8 @@ export default function ProfilePage() {
               onChange={e => setFullName(e.target.value)}
               disabled={!editing}
               placeholder="Your full name"
-              className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 ${
-                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900'
+              className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 ${
+                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900 bg-white'
               }`}
             />
           </div>
@@ -212,8 +212,8 @@ export default function ProfilePage() {
               onChange={e => setJobTitle(e.target.value)}
               disabled={!editing}
               placeholder="e.g., Senior Engineer"
-              className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 ${
-                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900'
+              className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 ${
+                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900 bg-white'
               }`}
             />
           </div>
@@ -226,8 +226,8 @@ export default function ProfilePage() {
               onChange={e => setDepartment(e.target.value)}
               disabled={!editing}
               placeholder="e.g., Engineering"
-              className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 ${
-                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900'
+              className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 ${
+                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900 bg-white'
               }`}
             />
           </div>
@@ -240,8 +240,8 @@ export default function ProfilePage() {
               onChange={e => setManagerName(e.target.value)}
               disabled={!editing}
               placeholder="Your manager's name"
-              className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 ${
-                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900'
+              className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 ${
+                !editing ? 'bg-gray-50 cursor-not-allowed text-gray-600' : 'text-gray-900 bg-white'
               }`}
             />
           </div>
