@@ -214,7 +214,7 @@ export default function CyclesPage() {
             </button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {activeCycles.map(cycle => (
               <CycleCard
                 key={cycle.id}
@@ -240,7 +240,7 @@ export default function CyclesPage() {
             >
               {showArchived ? '▾' : '▸'} Archived ({archivedCycles.length})
             </button>
-            {showArchived && archivedCycles.map(cycle => (
+            {showArchived && <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">{archivedCycles.map(cycle => (
               <CycleCard
                 key={cycle.id}
                 cycle={cycle}
@@ -252,7 +252,7 @@ export default function CyclesPage() {
                 onDeleteCancel={() => setConfirmDelete(null)}
                 onDeleteConfirm={handleDelete}
               />
-            ))}
+            ))}</div>}
           </div>
         )}
       </div>
@@ -286,14 +286,14 @@ function CycleCard({
       isArchived ? 'border-gray-100 dark:border-slate-700 opacity-70' : 'border-gray-100 dark:border-slate-700'
     }`}>
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{cycle.name}</p>
             {isArchived && (
               <span className="text-xs bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 px-2 py-0.5 rounded-full">Archived</span>
             )}
           </div>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
             {formatDate(cycle.start_date)} – {formatDate(cycle.end_date)}
           </p>
         </div>

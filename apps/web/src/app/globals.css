@@ -13,6 +13,14 @@
 
   --font-sans: var(--font-inter);
   --font-display: var(--font-cabinet);
+
+  /* Pin max-w-5xl to 1280px so it stays fixed regardless of rem base */
+  --max-w-5xl: 1280px;
+}
+
+html {
+  /* Scale all rem-based sizes up by one Tailwind step (16px → 18px) */
+  font-size: 112.5%;
 }
 
 body {

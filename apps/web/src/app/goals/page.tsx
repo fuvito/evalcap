@@ -206,7 +206,7 @@ function EvaluationTab({
           <p className="text-gray-400 dark:text-slate-500 text-xs max-w-xs mx-auto">Add the goals you're being evaluated on — they'll be used to personalise your check-in prompts and summaries.</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {activeGoals.map(goal => (
             <EvalGoalCard
               key={goal.id}
@@ -251,22 +251,22 @@ function EvalGoalCard({
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-slate-700 dark:text-slate-200 leading-snug">{goal.title}</p>
           {goal.description && <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{goal.description}</p>}
-          {cycle && <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{cycle.name}</p>}
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <select
+              value={goal.status}
+              onChange={e => onStatusChange(goal, e.target.value as EvaluationGoal['status'])}
+              className={`text-xs px-2 py-0.5 rounded-full border-0 font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-500 ${EVAL_STATUS_COLORS[goal.status]}`}
+            >
+              {EVAL_STATUSES.map(s => (
+                <option key={s} value={s}>{EVAL_STATUS_LABELS[s]}</option>
+              ))}
+            </select>
+            {cycle && <span className="text-xs text-gray-400 dark:text-slate-500">{cycle.name}</span>}
+          </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <select
-            value={goal.status}
-            onChange={e => onStatusChange(goal, e.target.value as EvaluationGoal['status'])}
-            className={`text-xs px-2 py-1 rounded-full border-0 font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-500 ${EVAL_STATUS_COLORS[goal.status]}`}
-          >
-            {EVAL_STATUSES.map(s => (
-              <option key={s} value={s}>{EVAL_STATUS_LABELS[s]}</option>
-            ))}
-          </select>
-          <button onClick={() => onDeleteRequest(goal.id)} className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors">
-            Delete
-          </button>
-        </div>
+        <button onClick={() => onDeleteRequest(goal.id)} className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors flex-shrink-0">
+          Delete
+        </button>
       </div>
 
       {confirmDelete === goal.id && (
@@ -397,7 +397,7 @@ function PersonalTab({
           <p className="text-gray-400 dark:text-slate-500 text-xs max-w-xs mx-auto">Add growth goals like a promotion target or a skill you want to build. These will be used as context in your prompts and summaries.</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {activeGoals.map(goal => (
             <PersonalGoalCard
               key={goal.id}
@@ -433,38 +433,38 @@ function PersonalGoalCard({
   return (
     <div className={`bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-4 shadow-sm space-y-2 ${isComplete ? 'opacity-60' : ''}`}>
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3 flex-1 min-w-0">
-          <button
-            onClick={() => onComplete(goal)}
-            className={`mt-0.5 w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
-              isComplete
-                ? 'bg-green-500 border-green-500 text-white'
-                : 'border-gray-300 dark:border-slate-500 hover:border-brand-500'
-            }`}
-            title={isComplete ? 'Mark active' : 'Mark complete'}
-          >
-            {isComplete && (
-              <svg className="w-2.5 h-2.5" viewBox="0 0 10 8" fill="none">
-                <path d="M1 4l3 3 5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
-          </button>
-          <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onComplete(goal)}
+              className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
+                isComplete
+                  ? 'bg-green-500 border-green-500 text-white'
+                  : 'border-gray-300 dark:border-slate-500 hover:border-brand-500'
+              }`}
+              title={isComplete ? 'Mark active' : 'Mark complete'}
+            >
+              {isComplete && (
+                <svg className="w-2.5 h-2.5" viewBox="0 0 10 8" fill="none">
+                  <path d="M1 4l3 3 5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
             <p className={`text-sm font-medium leading-snug ${isComplete ? 'line-through text-gray-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'}`}>
               {goal.title}
             </p>
-            {goal.description && <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{goal.description}</p>}
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PERSONAL_PRIORITY_COLORS[goal.priority]}`}>
-                {goal.priority}
-              </span>
-              {goal.category && (
-                <span className="text-xs text-gray-400 dark:text-slate-500">{CATEGORY_LABELS[goal.category]}</span>
-              )}
-              {goal.due_date && (
-                <span className="text-xs text-gray-400 dark:text-slate-500">Due {formatDate(goal.due_date)}</span>
-              )}
-            </div>
+          </div>
+          {goal.description && <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{goal.description}</p>}
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PERSONAL_PRIORITY_COLORS[goal.priority]}`}>
+              {goal.priority}
+            </span>
+            {goal.category && (
+              <span className="text-xs text-gray-400 dark:text-slate-500">{CATEGORY_LABELS[goal.category]}</span>
+            )}
+            {goal.due_date && (
+              <span className="text-xs text-gray-400 dark:text-slate-500">Due {formatDate(goal.due_date)}</span>
+            )}
           </div>
         </div>
         <button onClick={() => onDeleteRequest(goal.id)} className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors flex-shrink-0">
