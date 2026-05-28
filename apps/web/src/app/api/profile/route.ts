@@ -16,13 +16,33 @@ export async function GET(request: NextRequest) {
     logger.info('GET /api/profile', { userId: user.id }, 'api')
 
     // Fetch profile
-    const { data: profile, error: profileError } = await supabase
+    let { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
 
-    if (profileError) {
+    // If profile doesn't exist, create it on-demand
+    if (profileError && profileError.code === 'PGRST116') {
+      logger.info('Profile not found, creating on-demand', { userId: user.id }, 'api')
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: user.id,
+            email: user.email,
+          },
+        ])
+        .select()
+        .single()
+
+      if (createError) {
+        logger.error('Failed to create profile on-demand', createError, 'api')
+        return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 })
+      }
+
+      profile = newProfile
+    } else if (profileError) {
       logger.error('Failed to fetch profile', profileError, 'api')
       return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 })
     }
@@ -103,6 +123,33 @@ export async function PATCH(request: NextRequest) {
     }
 
     logger.info('PATCH /api/profile', { userId: user.id }, 'api')
+
+    // Check if profile exists, create if missing
+    const { data: existingProfile, error: checkError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single()
+
+    if (checkError && checkError.code === 'PGRST116') {
+      logger.info('Profile not found, creating before update', { userId: user.id }, 'api')
+      const { error: createError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: user.id,
+            email: user.email,
+          },
+        ])
+
+      if (createError) {
+        logger.error('Failed to create profile', createError, 'api')
+        return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 })
+      }
+    } else if (checkError) {
+      logger.error('Failed to check profile existence', checkError, 'api')
+      return NextResponse.json({ error: 'Failed to check profile' }, { status: 500 })
+    }
 
     // Build update object with provided fields
     const updateData: Record<string, any> = {}

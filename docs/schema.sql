@@ -34,15 +34,20 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- INSERT is handled exclusively by the handle_new_user trigger (SECURITY DEFINER).
--- No INSERT policy is intentional — users cannot insert their own profile row.
+-- INSERT is handled by the handle_new_user trigger (SECURITY DEFINER) on signup.
+-- We also allow authenticated users to insert their own profile (for on-demand creation).
 
 DROP POLICY IF EXISTS "Users can view own profile"   ON profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 
 CREATE POLICY "Users can view own profile"
   ON profiles FOR SELECT
   USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert own profile"
+  ON profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE
@@ -53,7 +58,7 @@ CREATE OR REPLACE TRIGGER profiles_updated_at
   BEFORE UPDATE ON profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-GRANT SELECT, UPDATE ON profiles TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON profiles TO authenticated;
 
 
 -- ─────────────────────────────────────────────────────────────
@@ -172,3 +177,26 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+
+-- ─────────────────────────────────────────────────────────────
+-- Ensure user profile exists (called by API if missing)
+-- ─────────────────────────────────────────────────────────────
+-- SECURITY DEFINER allows authenticated users to ensure their profile exists
+CREATE OR REPLACE FUNCTION ensure_profile_exists(user_id UUID, user_email TEXT)
+RETURNS TABLE(id UUID, email TEXT, full_name TEXT, role TEXT, job_title TEXT, department TEXT, manager_name TEXT, default_check_in_type TEXT, onboarding_completed BOOLEAN, created_at TIMESTAMPTZ, updated_at TIMESTAMPTZ) AS $$
+BEGIN
+  -- Try to insert if not exists
+  INSERT INTO public.profiles (id, email)
+  VALUES (user_id, user_email)
+  ON CONFLICT (id) DO NOTHING;
+
+  -- Return the profile (now guaranteed to exist)
+  RETURN QUERY
+  SELECT p.id, p.email, p.full_name, p.role, p.job_title, p.department, p.manager_name, p.default_check_in_type, p.onboarding_completed, p.created_at, p.updated_at
+  FROM public.profiles p
+  WHERE p.id = user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+GRANT EXECUTE ON FUNCTION ensure_profile_exists(UUID, TEXT) TO authenticated;
