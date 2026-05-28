@@ -30,7 +30,7 @@ const nextConfig = {
           // Control referrer information
           {
             key: 'Referrer-Policy',
-            value: 'strict-no-referrer',
+            value: 'strict-origin-when-cross-origin',
           },
           // Restrict feature access
           {
