@@ -146,17 +146,15 @@ MVP features (auth, checkin, history, summary, dashboard) appear complete. This 
 - [x] Navigate to check-in page on completion
 - **Status**: Complete — 3-step onboarding flow with skip option
 
-### 16. Check-In Type Preference (Settings) (IN PROGRESS)
-- [ ] Create `/settings` page (client component with form)
-- [ ] Option to set default check-in type (daily vs weekly)
-- [ ] Add preference field to profiles table
-- [ ] Wire `GET/PATCH /api/settings` endpoints (or reuse /api/profile)
-- [ ] Save default preference to profiles table
-- [ ] Use preference in check-in page default selection
-- [ ] Add visual feedback when preference is saved
-- **Why**: User customization, improves retention.
-- **Status**: Starting implementation
-- **Time Est**: 3 hours
+### 16. Check-In Type Preference (Settings) ✅
+- [x] Create `/settings` page (client component with form)
+- [x] Option to set default check-in type (daily vs weekly) with radio buttons
+- [x] Save default preference via PATCH /api/profile
+- [x] Load default preference when creating new check-in
+- [x] Add validation for check-in type in API
+- [x] Add success/error feedback when saving
+- [x] Placeholder for future settings (theme, notifications, export)
+- **Status**: Complete — Settings page with check-in preference and API integration
 
 ### 17. Mobile Responsiveness Audit
 - [ ] Test all pages on mobile (iOS Safari, Android Chrome)
