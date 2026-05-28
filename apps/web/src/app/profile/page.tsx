@@ -187,7 +187,10 @@ export default function ProfilePage() {
               disabled
               className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 text-sm bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-slate-400 cursor-not-allowed"
             />
-            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Email cannot be changed</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
+              Change your email in{' '}
+              <a href="/account" className="text-brand-500 hover:text-brand-600 transition-colors">Account settings</a>
+            </p>
           </div>
 
           <div>
