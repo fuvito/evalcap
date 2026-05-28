@@ -21,54 +21,24 @@ export default function Image() {
           fontFamily: 'system-ui, sans-serif',
         }}
       >
-        {/* Logo */}
-        <div
-          style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: '#a5b4fc',
-            marginBottom: 48,
-            letterSpacing: '-0.5px',
-          }}
-        >
+        <div style={{ display: 'flex', fontSize: 28, fontWeight: 700, color: '#a5b4fc', marginBottom: 48, letterSpacing: '-0.5px' }}>
           EvalCap
         </div>
 
-        {/* Headline */}
-        <div
-          style={{
-            fontSize: 72,
-            fontWeight: 700,
-            color: '#f8fafc',
-            lineHeight: 1.1,
-            letterSpacing: '-2px',
-            maxWidth: 900,
-            marginBottom: 32,
-          }}
-        >
-          Your performance review,{' '}
+        <div style={{ display: 'flex', flexWrap: 'wrap', fontSize: 68, fontWeight: 700, color: '#f8fafc', lineHeight: 1.1, letterSpacing: '-2px', maxWidth: 900, marginBottom: 32 }}>
+          <span>Your performance review,&nbsp;</span>
           <span style={{ color: '#818cf8' }}>already written</span>
         </div>
 
-        {/* Subline */}
-        <div
-          style={{
-            fontSize: 28,
-            color: '#94a3b8',
-            fontWeight: 400,
-            maxWidth: 700,
-          }}
-        >
+        <div style={{ display: 'flex', fontSize: 28, color: '#94a3b8', fontWeight: 400, maxWidth: 700 }}>
           Five-minute weekly check-ins. An honest, polished self-review when you need it.
         </div>
 
-        {/* Badge */}
         <div
           style={{
-            marginTop: 48,
             display: 'flex',
+            marginTop: 48,
             alignItems: 'center',
-            gap: 12,
             background: 'rgba(99, 102, 241, 0.2)',
             border: '1px solid rgba(99, 102, 241, 0.4)',
             borderRadius: 50,
