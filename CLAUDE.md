@@ -89,6 +89,14 @@ NEXT_PUBLIC_APP_URL=
 - Sharing summaries
 - Export to PDF
 
+## Planning Documents
+
+| Document | Description |
+|---|---|
+| [`TASKS.md`](TASKS.md) | Feature backlog and completion status for the web app |
+| [`TASKS-ADMIN.md`](TASKS-ADMIN.md) | Internal admin interface spec — user management, credits, audit log (implementation pending) |
+| [`TASKS-MOBILE.md`](TASKS-MOBILE.md) | React Native / Expo mobile app spec — auth, check-in, push notifications, offline (Q3 2026) |
+
 ## Commands
 ```bash
 npm run dev          # Start all apps in dev mode

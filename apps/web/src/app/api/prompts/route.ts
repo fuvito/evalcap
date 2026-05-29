@@ -1,42 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createClientFromToken } from '@/lib/supabase/server'
 import { generateSmartPrompts } from '@/lib/claude'
 import { logger } from '@/lib/logger'
 import { validateCheckInType, ValidationException, logValidationError } from '@/lib/validation'
-import { checkRateLimit, getRateLimitInfo, type RateLimitConfig } from '@/lib/rate-limit'
-
-const PROMPTS_RATE_LIMIT: RateLimitConfig = {
-  maxRequests: 10,
-  windowMs: 60 * 1000, // 1 minute
-}
+import { rateLimit, LIMITS } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const bearer = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
+    const supabase = bearer ? createClientFromToken(bearer) : await createClient()
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await supabase.auth.getUser(bearer)
     if (authError || !user) {
       logger.warn('Unauthenticated request to /api/prompts', undefined, 'api')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check rate limit
-    if (!checkRateLimit(user.id, PROMPTS_RATE_LIMIT)) {
-      const rateInfo = getRateLimitInfo(user.id, PROMPTS_RATE_LIMIT)
-      logger.warn('Rate limit exceeded for /api/prompts', { userId: user.id }, 'api')
-      return NextResponse.json(
-        {
-          error: 'Rate limit exceeded',
-          message: `Too many requests. Please try again after ${rateInfo.resetAt.toISOString()}`,
-        },
-        {
-          status: 429,
-          headers: {
-            'Retry-After': Math.ceil((rateInfo.resetAt.getTime() - Date.now()) / 1000).toString(),
-          },
-        }
-      )
-    }
+    const limited = rateLimit(user.id, 'ai.prompts', LIMITS.AI_PROMPTS)
+    if (limited) return limited
 
     const body = await request.json()
     const { checkInType } = body

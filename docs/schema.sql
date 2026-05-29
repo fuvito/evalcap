@@ -330,3 +330,65 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 GRANT EXECUTE ON FUNCTION ensure_profile_exists(UUID, TEXT) TO authenticated;
+
+
+-- ─────────────────────────────────────────────────────────────
+-- Admin schema additions
+-- Run these after the base schema if upgrading an existing project.
+-- ─────────────────────────────────────────────────────────────
+
+-- Add status to profiles (active | suspended)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active'
+  CHECK (status IN ('active', 'suspended'));
+
+-- credits — per-user balance and monthly allocation
+CREATE TABLE IF NOT EXISTS credits (
+  id                  UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id             UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
+  balance             INTEGER     NOT NULL DEFAULT 0,
+  allocated_per_month INTEGER     NOT NULL DEFAULT 50,
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE credits ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own credits" ON credits;
+CREATE POLICY "Users can view own credits"
+  ON credits FOR SELECT USING (auth.uid() = user_id);
+
+GRANT SELECT ON credits TO authenticated;
+
+-- credit_events — immutable ledger of credit changes
+CREATE TABLE IF NOT EXISTS credit_events (
+  id         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id    UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  admin_id   UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
+  delta      INTEGER     NOT NULL,
+  reason     TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE credit_events ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own credit events" ON credit_events;
+CREATE POLICY "Users can view own credit events"
+  ON credit_events FOR SELECT USING (auth.uid() = user_id);
+
+GRANT SELECT ON credit_events TO authenticated;
+
+-- admin_audit_log — immutable record of every admin action
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+  id             UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  admin_id       UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
+  action         TEXT        NOT NULL,
+  target_user_id UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
+  detail         JSONB,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE admin_audit_log ENABLE ROW LEVEL SECURITY;
+-- No user-facing RLS policy — service role only
+
+CREATE INDEX IF NOT EXISTS admin_audit_log_created_idx ON admin_audit_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS admin_audit_log_admin_idx   ON admin_audit_log(admin_id);
+CREATE INDEX IF NOT EXISTS admin_audit_log_target_idx  ON admin_audit_log(target_user_id);

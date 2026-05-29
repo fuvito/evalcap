@@ -5,7 +5,7 @@ export function makeChain(result: unknown) {
   const chain: Record<string, unknown> = {}
   const chainMethods = [
     'select', 'insert', 'update', 'delete', 'upsert',
-    'eq', 'neq', 'in', 'order', 'limit', 'gte', 'lte', 'single',
+    'eq', 'neq', 'in', 'order', 'limit', 'gte', 'lte', 'single', 'maybeSingle',
   ] as const
   chainMethods.forEach(m => { chain[m] = jest.fn(() => chain) })
   chain['then'] = (resolve: (v: unknown) => unknown, reject: (e: unknown) => unknown) =>
@@ -33,6 +33,15 @@ export function jsonRequest(url: string, method: string, body: unknown): NextReq
   return new NextRequest(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
+
+/** Build a NextRequest with a JSON body and Bearer token. */
+export function bearerRequest(url: string, method: string, body: unknown, token: string): NextRequest {
+  return new NextRequest(url, {
+    method,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(body),
   })
 }

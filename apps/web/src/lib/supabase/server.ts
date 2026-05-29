@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 
@@ -23,6 +24,19 @@ export async function createClient() {
           }
         },
       },
+    }
+  )
+}
+
+// Creates a Supabase client scoped to a Bearer JWT — used by mobile API calls.
+// RLS works correctly because the token is forwarded in every request header.
+export function createClientFromToken(token: string) {
+  return createSupabaseClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false },
     }
   )
 }

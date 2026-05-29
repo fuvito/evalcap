@@ -1,19 +1,19 @@
 import { POST } from '../summary/route'
-import { makeSupabase, jsonRequest } from './helpers'
+import { makeSupabase, jsonRequest, bearerRequest } from './helpers'
 
 jest.mock('@/lib/supabase/server')
 jest.mock('@/lib/claude')
 jest.mock('@/lib/rate-limit')
 jest.mock('@anthropic-ai/sdk', () => ({ __esModule: true, default: jest.fn() }))
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createClientFromToken } from '@/lib/supabase/server'
 import { generateSummary } from '@/lib/claude'
-import { checkRateLimit, getRateLimitInfo } from '@/lib/rate-limit'
+import { rateLimit } from '@/lib/rate-limit'
 
 const mockCreateClient = createClient as jest.Mock
+const mockCreateClientFromToken = createClientFromToken as jest.Mock
 const mockGenerateSummary = generateSummary as jest.Mock
-const mockCheckRateLimit = checkRateLimit as jest.Mock
-const mockGetRateLimitInfo = getRateLimitInfo as jest.Mock
+const mockRateLimit = rateLimit as jest.Mock
 
 const AUTHED_USER = { id: 'user-1', email: 'test@example.com' }
 const ENTRIES = [
@@ -22,8 +22,7 @@ const ENTRIES = [
 ]
 
 beforeEach(() => {
-  mockCheckRateLimit.mockReturnValue(true)
-  mockGetRateLimitInfo.mockReturnValue({ remaining: 4, resetAt: new Date(Date.now() + 60000) })
+  mockRateLimit.mockReturnValue(null)
   mockGenerateSummary.mockResolvedValue('This is my performance summary.')
 })
 
@@ -41,7 +40,8 @@ describe('POST /api/summary', () => {
   })
 
   it('returns 429 when rate limit exceeded', async () => {
-    mockCheckRateLimit.mockReturnValue(false)
+    const { NextResponse } = await import('next/server')
+    mockRateLimit.mockReturnValue(NextResponse.json({ error: 'Too many requests' }, { status: 429 }))
     mockCreateClient.mockResolvedValue(makeSupabase(AUTHED_USER))
     const req = jsonRequest('http://localhost/api/summary', 'POST', {
       timeframeStart: '2026-05-01',
@@ -140,6 +140,34 @@ describe('POST /api/summary', () => {
     })
     const res = await POST(req)
     expect(res.status).toBe(500)
+  })
+
+  it('authenticates via Bearer token and returns summary', async () => {
+    mockCreateClientFromToken.mockReturnValue(
+      makeSupabase(AUTHED_USER, {
+        journal_entries: { data: ENTRIES, error: null },
+        evaluation_goals: { data: [], error: null },
+        personal_goals: { data: [], error: null },
+      })
+    )
+    const req = bearerRequest('http://localhost/api/summary', 'POST', {
+      timeframeStart: '2026-05-01',
+      timeframeEnd: '2026-05-31',
+    }, 'mobile-jwt-token')
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    expect(mockCreateClientFromToken).toHaveBeenCalledWith('mobile-jwt-token')
+    expect(mockCreateClient).not.toHaveBeenCalled()
+  })
+
+  it('returns 401 for invalid Bearer token', async () => {
+    mockCreateClientFromToken.mockReturnValue(makeSupabase(null))
+    const req = bearerRequest('http://localhost/api/summary', 'POST', {
+      timeframeStart: '2026-05-01',
+      timeframeEnd: '2026-05-31',
+    }, 'bad-token')
+    const res = await POST(req)
+    expect(res.status).toBe(401)
   })
 
   it('passes userInstructions to generateSummary', async () => {
