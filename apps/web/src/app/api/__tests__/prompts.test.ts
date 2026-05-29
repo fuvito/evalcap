@@ -79,6 +79,13 @@ describe('POST /api/prompts', () => {
     expect(res.status).toBe(200)
   })
 
+  it('returns 500 on unhandled error', async () => {
+    mockCreateClient.mockRejectedValue(new Error('connection failed'))
+    const req = jsonRequest('http://localhost/api/prompts', 'POST', { checkInType: 'daily' })
+    const res = await POST(req)
+    expect(res.status).toBe(500)
+  })
+
   it('returns 500 when fetching entries fails', async () => {
     mockCreateClient.mockResolvedValue(
       makeSupabase(AUTHED_USER, {

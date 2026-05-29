@@ -85,4 +85,14 @@ describe('POST /api/entries', () => {
     const res = await POST(req)
     expect(res.status).toBe(500)
   })
+
+  it('returns 500 on unhandled error', async () => {
+    mockCreateClient.mockRejectedValue(new Error('connection failed'))
+    const req = jsonRequest('http://localhost/api/entries', 'POST', {
+      content: 'Today I shipped the feature',
+      checkInType: 'daily',
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(500)
+  })
 })

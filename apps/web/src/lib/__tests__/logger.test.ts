@@ -55,4 +55,26 @@ describe('logger', () => {
     logger.warn('msg')
     expect(warnSpy).toHaveBeenCalledWith(expect.any(String), 'msg', '')
   })
+
+  it('suppresses logs for categories not in LOG_CATEGORIES', () => {
+    process.env.LOG_CATEGORIES = 'api'
+    let isolatedLogger: typeof logger
+    jest.isolateModules(() => {
+      const mod = require('../logger') as { logger: typeof logger }
+      isolatedLogger = mod.logger
+    })
+    isolatedLogger!.info('msg', undefined, 'other-category')
+    expect(infoSpy).not.toHaveBeenCalled()
+  })
+
+  it('allows logs for categories in LOG_CATEGORIES', () => {
+    process.env.LOG_CATEGORIES = 'api'
+    let isolatedLogger: typeof logger
+    jest.isolateModules(() => {
+      const mod = require('../logger') as { logger: typeof logger }
+      isolatedLogger = mod.logger
+    })
+    isolatedLogger!.info('msg', undefined, 'api')
+    expect(infoSpy).toHaveBeenCalled()
+  })
 })

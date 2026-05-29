@@ -118,6 +118,30 @@ describe('POST /api/summary', () => {
     expect(body.entriesUsed).toBe(2)
   })
 
+  it('returns 500 when fetching journal entries fails', async () => {
+    mockCreateClient.mockResolvedValue(
+      makeSupabase(AUTHED_USER, {
+        journal_entries: { data: null, error: { message: 'DB error' } },
+      })
+    )
+    const req = jsonRequest('http://localhost/api/summary', 'POST', {
+      timeframeStart: '2026-05-01',
+      timeframeEnd: '2026-05-31',
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(500)
+  })
+
+  it('returns 500 on unhandled error', async () => {
+    mockCreateClient.mockRejectedValue(new Error('connection failed'))
+    const req = jsonRequest('http://localhost/api/summary', 'POST', {
+      timeframeStart: '2026-05-01',
+      timeframeEnd: '2026-05-31',
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(500)
+  })
+
   it('passes userInstructions to generateSummary', async () => {
     mockCreateClient.mockResolvedValue(
       makeSupabase(AUTHED_USER, {

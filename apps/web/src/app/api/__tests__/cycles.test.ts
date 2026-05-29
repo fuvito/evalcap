@@ -79,4 +79,32 @@ describe('POST /api/cycles', () => {
     const body = await res.json()
     expect(body.cycle.name).toBe('Q2 2026')
   })
+
+  it('returns 500 when DB insert fails', async () => {
+    mockCreateClient.mockResolvedValue(
+      makeSupabase(AUTHED_USER, { performance_cycles: { data: null, error: { message: 'insert failed' } } })
+    )
+    const req = jsonRequest('http://localhost/api/cycles', 'POST', {
+      name: 'Q2 2026', start_date: '2026-04-01', end_date: '2026-06-30',
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(500)
+  })
+
+  it('returns 500 on unhandled POST error', async () => {
+    mockCreateClient.mockRejectedValue(new Error('connection failed'))
+    const req = jsonRequest('http://localhost/api/cycles', 'POST', {
+      name: 'Q2 2026', start_date: '2026-04-01', end_date: '2026-06-30',
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(500)
+  })
+})
+
+describe('GET /api/cycles — error paths', () => {
+  it('returns 500 on unhandled GET error', async () => {
+    mockCreateClient.mockRejectedValue(new Error('connection failed'))
+    const res = await GET()
+    expect(res.status).toBe(500)
+  })
 })

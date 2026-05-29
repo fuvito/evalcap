@@ -73,4 +73,15 @@ describe('POST /api/summaries', () => {
     const res = await POST(req)
     expect(res.status).toBe(500)
   })
+
+  it('returns 500 on unhandled error', async () => {
+    mockCreateClient.mockRejectedValue(new Error('connection failed'))
+    const req = jsonRequest('http://localhost/api/summaries', 'POST', {
+      timeframeStart: '2026-05-01',
+      timeframeEnd: '2026-05-31',
+      content: 'Great quarter',
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(500)
+  })
 })

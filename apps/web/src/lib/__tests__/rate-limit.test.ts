@@ -79,4 +79,54 @@ describe('rate-limit', () => {
       expect(info.resetAt.getTime()).toBeGreaterThan(Date.now())
     })
   })
+
+  describe('cleanup interval', () => {
+    afterEach(() => jest.useRealTimers())
+
+    it('removes expired entries after 5 minutes and logs cleanup', () => {
+      jest.useFakeTimers()
+      const debugSpy = jest.spyOn(console, 'debug').mockImplementation(() => {})
+
+      let localCheck: (id: string, config: { maxRequests: number; windowMs: number }) => boolean
+      jest.isolateModules(() => {
+        const mod = require('@/lib/rate-limit') as typeof import('../rate-limit')
+        localCheck = mod.checkRateLimit
+      })
+
+      // Create an entry that will be immediately expired (1ms window)
+      localCheck!('cleanup-key', { maxRequests: 5, windowMs: 1 })
+
+      // Advance past 5-minute cleanup interval
+      jest.advanceTimersByTime(5 * 60 * 1000)
+
+      expect(debugSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[DEBUG]'),
+        'Rate limit cleanup',
+        expect.objectContaining({ cleaned: 1 })
+      )
+
+      debugSpy.mockRestore()
+    })
+
+    it('does not log when no entries are cleaned', () => {
+      jest.useFakeTimers()
+      const debugSpy = jest.spyOn(console, 'debug').mockImplementation(() => {})
+
+      jest.isolateModules(() => {
+        // Import to register the setInterval - empty store, nothing to clean
+        require('@/lib/rate-limit')
+      })
+
+      jest.advanceTimersByTime(5 * 60 * 1000)
+
+      // No expired entries → cleaned = 0 → no debug log
+      expect(debugSpy).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'Rate limit cleanup',
+        expect.anything()
+      )
+
+      debugSpy.mockRestore()
+    })
+  })
 })

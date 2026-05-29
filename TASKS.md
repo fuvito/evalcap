@@ -42,12 +42,14 @@ This document tracks remaining work to polish, harden, and extend the product.
 ### Bug Fixes
 - [x] Dashboard showing 0 for all stats — removed `unstable_cache`/`createAdminClient`, now queries fresh with authenticated user client
 
-### Testing (2026-05-28) — 154 tests, all passing
+### Testing (2026-05-28) — 209 tests, all passing
 - [x] `test:coverage` and `test:ci` scripts in package.json
 - [x] `lib/validation.ts` — 100% coverage
 - [x] `lib/claude.ts` — 100% stmt/func/line coverage
 - [x] `lib/rate-limit.ts` — 72% coverage + `.unref()` fix
 - [x] `lib/logger.ts` — 86% coverage
+- [x] `lib/fetcher.ts` — 100% coverage
+- [x] `proxy.ts` (middleware) — 74% stmt / 100% branch coverage
 - [x] `api/entries` POST — 90%
 - [x] `api/entries/[id]` GET/PATCH/DELETE — 86%
 - [x] `api/prompts` POST — 93%
@@ -64,6 +66,14 @@ This document tracks remaining work to polish, harden, and extend the product.
 - [x] `api/goals/evaluation/[id]` PATCH/DELETE — 85%
 - [x] `api/goals/personal` GET/POST — 84%
 - [x] `api/goals/personal/[id]` PATCH/DELETE — 83%
+- [x] `auth/callback/route.ts` — 82% coverage
+- [x] `components/skeleton.tsx` — 100% coverage
+- [x] `components/cookie-banner.tsx` — 100% coverage
+- [x] `components/nav.tsx` — 91% coverage
+- [x] `components/onboarding-modal.tsx` — 88% coverage
+- [x] `components/theme-provider.tsx` — 89% coverage
+- [x] `app/error.tsx` — covered (jsdom + RTL)
+- [x] Install `jest-environment-jsdom` + fix `moduleNameMapper` for React 19 in monorepo
 
 ---
 
@@ -108,6 +118,8 @@ This document tracks remaining work to polish, harden, and extend the product.
 - [ ] E2E tests with Playwright (signup → checkin → summary flow)
 - [ ] Increase `api/profile` coverage (currently 71%)
 - [ ] Increase `api/cycles/[id]` coverage (currently 78%)
+- [x] Component tests: skeleton, cookie-banner, nav, onboarding-modal, theme-provider, error
+- [x] `lib/fetcher.ts`, `proxy.ts`, `auth/callback` route tests
 
 ### Integrations (Future)
 - [ ] Calendar sync, Jira/Linear, Slack, PDF export
@@ -143,5 +155,14 @@ This document tracks remaining work to polish, harden, and extend the product.
 | `api/goals/personal` | 84% | |
 | `api/goals/personal/[id]` | 83% | |
 | `api/profile` | 71% | on-demand create path complex |
+| `auth/callback/route.ts` | 82% | |
+| `proxy.ts` | 74% | |
+| `components/skeleton.tsx` | 100% | full |
+| `components/cookie-banner.tsx` | 100% | full |
+| `components/nav.tsx` | 91% | |
+| `components/onboarding-modal.tsx` | 88% | |
+| `components/theme-provider.tsx` | 89% | |
+| `app/error.tsx` | ~90% | |
+| `lib/fetcher.ts` | 100% | full |
 
-**Total: 154 tests, 0 failing**
+**Total: 209 tests, 0 failing**

@@ -48,6 +48,46 @@ describe('PATCH /api/cycles/[id]', () => {
     const res = await PATCH(req, ASYNC_PARAMS)
     expect(res.status).toBe(404)
   })
+
+  it('updates start_date and end_date fields', async () => {
+    const updated = { ...CYCLE, start_date: '2026-05-01', end_date: '2026-07-31' }
+    mockCreateClient.mockResolvedValue(
+      makeSupabase(AUTHED_USER, { performance_cycles: { data: updated, error: null } })
+    )
+    const req = jsonRequest('http://localhost/api/cycles/cycle-1', 'PATCH', {
+      start_date: '2026-05-01', end_date: '2026-07-31',
+    })
+    const res = await PATCH(req, ASYNC_PARAMS)
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.cycle.start_date).toBe('2026-05-01')
+  })
+
+  it('updates status to archived', async () => {
+    const updated = { ...CYCLE, status: 'archived' }
+    mockCreateClient.mockResolvedValue(
+      makeSupabase(AUTHED_USER, { performance_cycles: { data: updated, error: null } })
+    )
+    const req = jsonRequest('http://localhost/api/cycles/cycle-1', 'PATCH', { status: 'archived' })
+    const res = await PATCH(req, ASYNC_PARAMS)
+    expect(res.status).toBe(200)
+  })
+
+  it('returns 500 when PATCH DB fails', async () => {
+    mockCreateClient.mockResolvedValue(
+      makeSupabase(AUTHED_USER, { performance_cycles: { data: null, error: { message: 'update failed' } } })
+    )
+    const req = jsonRequest('http://localhost/api/cycles/cycle-1', 'PATCH', { name: 'Updated' })
+    const res = await PATCH(req, ASYNC_PARAMS)
+    expect(res.status).toBe(500)
+  })
+
+  it('returns 500 on unhandled PATCH error', async () => {
+    mockCreateClient.mockRejectedValue(new Error('fail'))
+    const req = jsonRequest('http://localhost/api/cycles/cycle-1', 'PATCH', { name: 'Updated' })
+    const res = await PATCH(req, ASYNC_PARAMS)
+    expect(res.status).toBe(500)
+  })
 })
 
 describe('DELETE /api/cycles/[id]', () => {
@@ -71,6 +111,13 @@ describe('DELETE /api/cycles/[id]', () => {
     mockCreateClient.mockResolvedValue(
       makeSupabase(AUTHED_USER, { performance_cycles: { data: null, error: { message: 'DB error' } } })
     )
+    const req = new Request('http://localhost/api/cycles/cycle-1', { method: 'DELETE' }) as any
+    const res = await DELETE(req, ASYNC_PARAMS)
+    expect(res.status).toBe(500)
+  })
+
+  it('returns 500 on unhandled DELETE error', async () => {
+    mockCreateClient.mockRejectedValue(new Error('fail'))
     const req = new Request('http://localhost/api/cycles/cycle-1', { method: 'DELETE' }) as any
     const res = await DELETE(req, ASYNC_PARAMS)
     expect(res.status).toBe(500)
