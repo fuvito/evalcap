@@ -321,6 +321,17 @@ export default function HomePage() {
 
       </main>
 
+      <footer className="border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-950">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400 dark:text-slate-500">
+          <span>© {new Date().getFullYear()} EvalCap</span>
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="hover:text-brand-500 dark:hover:text-brand-400 transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-brand-500 dark:hover:text-brand-400 transition-colors">Terms of Service</Link>
+            <a href="mailto:support@evalcap.app" className="hover:text-brand-500 dark:hover:text-brand-400 transition-colors">Contact</a>
+          </div>
+        </div>
+      </footer>
+
     </div>
   )
 }

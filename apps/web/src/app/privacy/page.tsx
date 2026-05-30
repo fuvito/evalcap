@@ -31,9 +31,10 @@ export default function PrivacyPage() {
               <li><strong className="text-slate-700 dark:text-slate-200">Profile data</strong> — optional fields you choose to fill in: full name, job title, department, and manager name. These are used to personalise your experience.</li>
               <li><strong className="text-slate-700 dark:text-slate-200">Journal entries</strong> — the check-in responses you write. This is the core content of the service.</li>
               <li><strong className="text-slate-700 dark:text-slate-200">Summaries</strong> — AI-generated performance review summaries created from your journal entries.</li>
-              <li><strong className="text-slate-700 dark:text-slate-200">Usage preferences</strong> — settings such as default check-in type and theme preference (stored locally in your browser).</li>
+              <li><strong className="text-slate-700 dark:text-slate-200">Subscription data</strong> — if you subscribe to a paid plan, billing and subscription management is handled by <strong className="text-slate-700 dark:text-slate-200">RevenueCat</strong>. We do not store your payment card details. RevenueCat's data handling is governed by their <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-600 dark:text-brand-400 hover:underline">Privacy Policy</a>.</li>
+              <li><strong className="text-slate-700 dark:text-slate-200">Usage preferences</strong> — settings such as default check-in type and theme preference (stored locally in your browser or device).</li>
             </ul>
-            <p>We do not collect payment information, browsing behaviour, or any data beyond what is listed above.</p>
+            <p>We do not sell your data, use it for advertising, or collect any data beyond what is listed above.</p>
           </section>
 
           <section className="space-y-3">

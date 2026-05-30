@@ -76,6 +76,22 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-3">
+            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">Subscription and Billing</h2>
+            <p>
+              EvalCap offers a free tier and paid subscription plans. Subscriptions are billed on a recurring basis (monthly or annually, depending on the plan selected).
+            </p>
+            <ul className="list-disc list-outside pl-5 space-y-2">
+              <li>Payments are processed by <strong className="text-slate-700 dark:text-slate-200">RevenueCat</strong>, which handles billing for both the web and mobile apps. By subscribing, you agree to RevenueCat's terms.</li>
+              <li>Subscriptions renew automatically unless cancelled before the renewal date.</li>
+              <li><strong className="text-slate-700 dark:text-slate-200">iOS:</strong> Subscriptions purchased through the App Store are managed via your Apple ID settings. Cancellations must be made through Apple.</li>
+              <li><strong className="text-slate-700 dark:text-slate-200">Android:</strong> Subscriptions purchased through Google Play are managed via your Google account. Cancellations must be made through Google Play.</li>
+              <li><strong className="text-slate-700 dark:text-slate-200">Web:</strong> Subscriptions purchased on the website can be managed in your account settings.</li>
+              <li>We do not offer refunds except where required by applicable law.</li>
+              <li>Downgrading to the free tier does not delete your data. All entries and summaries remain accessible.</li>
+            </ul>
+          </section>
+
+          <section className="space-y-3">
             <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">Availability and Changes</h2>
             <p>
               We aim to keep the Service available but do not guarantee uninterrupted access. We may modify, suspend, or discontinue any part of the Service at any time. We will provide reasonable notice for material changes that affect your data.

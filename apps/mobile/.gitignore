@@ -21,4 +21,5 @@ web-build/
 .env.local
 google-services.json
 GoogleService-Info.plist
+google-play-service-account.json
 /.env.local

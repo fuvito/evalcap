@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 10.0.0"
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -8,6 +9,9 @@
       "distribution": "internal",
       "ios": {
         "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "development"
       }
     },
     "preview": {
@@ -17,15 +21,22 @@
       },
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "preview"
       }
     },
     "production": {
       "distribution": "store",
+      "autoIncrement": true,
       "ios": {
         "simulator": false
       },
       "android": {
         "buildType": "aab"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production"
       }
     }
   },
@@ -37,7 +48,7 @@
         "appleTeamId": "YOUR_APPLE_TEAM_ID"
       },
       "android": {
-        "serviceAccountKeyPath": "./google-services.json",
+        "serviceAccountKeyPath": "./google-play-service-account.json",
         "track": "internal"
       }
     }
