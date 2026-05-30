@@ -16,6 +16,7 @@ export type Database = {
           manager_name: string | null
           default_check_in_type: 'daily' | 'weekly'
           onboarding_completed: boolean
+          status: 'active' | 'suspended' | null
           created_at: string
           updated_at: string
         }
@@ -29,6 +30,7 @@ export type Database = {
           manager_name?: string | null
           default_check_in_type?: 'daily' | 'weekly'
           onboarding_completed?: boolean
+          status?: 'active' | 'suspended' | null
         }
         Update: {
           full_name?: string | null
@@ -38,7 +40,65 @@ export type Database = {
           manager_name?: string | null
           default_check_in_type?: 'daily' | 'weekly'
           onboarding_completed?: boolean
+          status?: 'active' | 'suspended' | null
         }
+        Relationships: []
+      }
+      credits: {
+        Row: {
+          id: string
+          user_id: string
+          balance: number
+          allocated_per_month: number
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          balance?: number
+          allocated_per_month?: number
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          allocated_per_month?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      credit_events: {
+        Row: {
+          id: string
+          user_id: string
+          admin_id: string | null
+          delta: number
+          reason: string | null
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          admin_id?: string | null
+          delta: number
+          reason?: string | null
+        }
+        Update: never
+        Relationships: []
+      }
+      admin_audit_log: {
+        Row: {
+          id: string
+          admin_id: string | null
+          action: string
+          target_user_id: string | null
+          detail: Record<string, unknown> | null
+          created_at: string
+        }
+        Insert: {
+          admin_id?: string | null
+          action: string
+          target_user_id?: string | null
+          detail?: Record<string, unknown> | null
+        }
+        Update: never
         Relationships: []
       }
       journal_entries: {
@@ -193,3 +253,6 @@ export type Summary = Database['public']['Tables']['summaries']['Row']
 export type PerformanceCycle = Database['public']['Tables']['performance_cycles']['Row']
 export type EvaluationGoal = Database['public']['Tables']['evaluation_goals']['Row']
 export type PersonalGoal = Database['public']['Tables']['personal_goals']['Row']
+export type Credit = Database['public']['Tables']['credits']['Row']
+export type CreditEvent = Database['public']['Tables']['credit_events']['Row']
+export type AdminAuditLog = Database['public']['Tables']['admin_audit_log']['Row']

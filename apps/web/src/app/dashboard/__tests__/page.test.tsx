@@ -40,6 +40,16 @@ const mockDashboardData = {
   highPriorityGoals: [],
 }
 
+function mockAuthenticatedClient({ onboardingCompleted = true } = {}) {
+  const single = jest.fn().mockResolvedValue({ data: { onboarding_completed: onboardingCompleted } })
+  const eq = jest.fn().mockReturnValue({ single })
+  const select = jest.fn().mockReturnValue({ eq })
+  return {
+    auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1' } } }) },
+    from: jest.fn().mockReturnValue({ select }),
+  }
+}
+
 beforeEach(() => jest.clearAllMocks())
 
 describe('DashboardPage', () => {
@@ -51,9 +61,7 @@ describe('DashboardPage', () => {
   })
 
   it('renders dashboard with stats', async () => {
-    ;(createClient as jest.Mock).mockResolvedValue({
-      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1' } } }) },
-    })
+    ;(createClient as jest.Mock).mockResolvedValue(mockAuthenticatedClient())
     ;(getCachedDashboardData as jest.Mock).mockResolvedValue(mockDashboardData)
 
     let jsx: React.ReactNode
@@ -66,9 +74,7 @@ describe('DashboardPage', () => {
   })
 
   it('renders empty state when no check-ins', async () => {
-    ;(createClient as jest.Mock).mockResolvedValue({
-      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1' } } }) },
-    })
+    ;(createClient as jest.Mock).mockResolvedValue(mockAuthenticatedClient())
     ;(getCachedDashboardData as jest.Mock).mockResolvedValue({
       ...mockDashboardData,
       entryCount: 0,
@@ -82,9 +88,7 @@ describe('DashboardPage', () => {
   })
 
   it('renders active cycles section when cycles exist', async () => {
-    ;(createClient as jest.Mock).mockResolvedValue({
-      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1' } } }) },
-    })
+    ;(createClient as jest.Mock).mockResolvedValue(mockAuthenticatedClient())
     ;(getCachedDashboardData as jest.Mock).mockResolvedValue({
       ...mockDashboardData,
       activeCycles: [
@@ -100,9 +104,7 @@ describe('DashboardPage', () => {
   })
 
   it('renders goals section when goals exist', async () => {
-    ;(createClient as jest.Mock).mockResolvedValue({
-      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1' } } }) },
-    })
+    ;(createClient as jest.Mock).mockResolvedValue(mockAuthenticatedClient())
     ;(getCachedDashboardData as jest.Mock).mockResolvedValue({
       ...mockDashboardData,
       inProgressGoals: [{ id: 'g1', title: 'Ship feature', status: 'in_progress' }],
@@ -117,9 +119,7 @@ describe('DashboardPage', () => {
   })
 
   it('renders generate summary CTA when entries exist and no active cycles', async () => {
-    ;(createClient as jest.Mock).mockResolvedValue({
-      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1' } } }) },
-    })
+    ;(createClient as jest.Mock).mockResolvedValue(mockAuthenticatedClient())
     ;(getCachedDashboardData as jest.Mock).mockResolvedValue({
       ...mockDashboardData,
       activeCycles: [],

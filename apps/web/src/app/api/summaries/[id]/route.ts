@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidateTag, revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { sanitizeText, ValidationException } from '@/lib/validation'
+import { rateLimit, LIMITS } from '@/lib/rate-limit'
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -11,6 +12,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = rateLimit(user.id, 'summaries.write', LIMITS.WRITE)
+    if (limited) return limited
 
     const { id } = await params
     const body = await request.json()
@@ -54,6 +58,9 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = rateLimit(user.id, 'summaries.write', LIMITS.WRITE)
+    if (limited) return limited
 
     const { id } = await params
 

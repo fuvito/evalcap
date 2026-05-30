@@ -3,6 +3,8 @@ import { Stack, useRouter, useSegments } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuth } from '@/contexts/auth'
+import { useBiometricLock } from '@/hooks/useBiometricLock'
+import { LockScreen } from '@/components/LockScreen'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,6 +16,7 @@ function RootLayoutNav() {
   const { session, loading } = useAuth()
   const segments = useSegments()
   const router = useRouter()
+  const { locked, biometricType, unlock } = useBiometricLock()
 
   useEffect(() => {
     if (loading) return
@@ -28,10 +31,15 @@ function RootLayoutNav() {
   }, [session, loading, segments])
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+      {locked && biometricType !== 'none' && (
+        <LockScreen biometricType={biometricType} onUnlock={unlock} />
+      )}
+    </>
   )
 }
 

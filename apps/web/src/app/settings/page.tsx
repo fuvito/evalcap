@@ -125,12 +125,12 @@ export default function SettingsPage() {
         <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">Appearance</h2>
           <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Theme</label>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {themeOptions.map(opt => (
               <button
                 key={opt.value}
                 onClick={() => handleThemeChange(opt.value)}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-colors text-left ${
+                className={`flex flex-col items-center gap-1.5 p-2 sm:p-3 rounded-xl border-2 transition-colors text-left ${
                   theme === opt.value
                     ? 'border-brand-500 bg-brand-50 dark:bg-slate-700'
                     : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'
@@ -142,7 +142,7 @@ export default function SettingsPage() {
                 <span className={`text-sm font-medium ${theme === opt.value ? 'text-brand-600 dark:text-brand-400' : 'text-slate-700 dark:text-slate-300'}`}>
                   {opt.label}
                 </span>
-                <span className="text-xs text-gray-500 dark:text-slate-400 text-center">{opt.description}</span>
+                <span className="hidden sm:block text-xs text-gray-500 dark:text-slate-400 text-center">{opt.description}</span>
               </button>
             ))}
           </div>

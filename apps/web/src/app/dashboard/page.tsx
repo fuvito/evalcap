@@ -19,10 +19,13 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const { entryCount, summaryCount, recentEntries, activeCycles, inProgressGoals, highPriorityGoals } =
-    await getCachedDashboardData(user.id)
+  const [dashboardData, profileResult] = await Promise.all([
+    getCachedDashboardData(user.id),
+    supabase.from('profiles').select('onboarding_completed').eq('id', user.id).single(),
+  ])
 
-  const isFirstTime = !entryCount || entryCount === 0
+  const { entryCount, summaryCount, recentEntries, activeCycles, inProgressGoals, highPriorityGoals, streak, checkedInThisWeek } = dashboardData
+  const onboardingCompleted = profileResult.data?.onboarding_completed ?? false
 
   const EVAL_STATUS_COLORS: Record<string, string> = {
     not_started: 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400',
@@ -32,7 +35,7 @@ export default async function DashboardPage() {
   return (
     <>
       <Nav />
-      <DashboardClient isFirstTime={isFirstTime}>
+      <DashboardClient onboardingCompleted={onboardingCompleted}>
         <div className="max-w-5xl mx-auto px-4 md:px-8 py-8 space-y-8">
 
           {/* Header */}
@@ -57,12 +60,36 @@ export default async function DashboardPage() {
               <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">{summaryCount ?? 0}</p>
             </div>
             <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-5 shadow-sm col-span-2 md:col-span-1">
-              <p className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1">Last Check-in</p>
-              <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">
-                {recentEntries?.[0] ? formatDate(recentEntries[0].created_at) : '—'}
-              </p>
+              <p className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1">Week Streak</p>
+              <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">{streak}</p>
+              {streak === 0
+                ? <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Check in to start one</p>
+                : checkedInThisWeek
+                  ? <p className="text-xs text-green-600 dark:text-green-400 mt-1">Checked in this week</p>
+                  : <p className="text-xs text-amber-500 dark:text-amber-400 mt-1">Check in to keep it going</p>
+              }
             </div>
           </div>
+
+          {/* Streak nudge */}
+          {!checkedInThisWeek && (entryCount ?? 0) > 0 && (
+            <div className="bg-brand-50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-800 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-brand-800 dark:text-brand-200">
+                  {streak > 0 ? `Keep your ${streak}-week streak going` : "Time for your weekly check-in"}
+                </p>
+                <p className="text-xs text-brand-600 dark:text-brand-400 mt-0.5">
+                  {streak > 0 ? "You haven't checked in this week yet — don't break the streak." : "Regular check-ins build a stronger performance review."}
+                </p>
+              </div>
+              <Link
+                href="/checkin"
+                className="flex-shrink-0 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors"
+              >
+                Check in now
+              </Link>
+            </div>
+          )}
 
           {/* Active cycles */}
           {activeCycles && activeCycles.length > 0 && (

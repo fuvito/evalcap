@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
 import { validateOptionalString, ValidationException } from '@/lib/validation'
+import { rateLimit, LIMITS } from '@/lib/rate-limit'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +13,9 @@ export async function GET(request: NextRequest) {
       logger.warn('Unauthenticated request to GET /api/profile', undefined, 'api')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = rateLimit(user.id, 'profile.read', LIMITS.READ)
+    if (limited) return limited
 
     logger.info('GET /api/profile', { userId: user.id }, 'api')
 
@@ -94,6 +98,9 @@ export async function PATCH(request: NextRequest) {
       logger.warn('Unauthenticated request to PATCH /api/profile', undefined, 'api')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = rateLimit(user.id, 'profile.write', LIMITS.WRITE)
+    if (limited) return limited
 
     const body = await request.json()
     const { full_name, job_title, department, manager_name, default_check_in_type, onboarding_completed } = body

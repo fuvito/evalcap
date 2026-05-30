@@ -7,13 +7,11 @@ jest.mock('@/components/onboarding-modal', () => ({
     isOpen ? <div data-testid="onboarding-modal"><button onClick={onComplete}>Complete</button></div> : null,
 }))
 
-beforeEach(() => localStorage.clear())
-
 describe('DashboardClient', () => {
   it('renders children', async () => {
     await act(async () => {
       render(
-        <DashboardClient isFirstTime={false}>
+        <DashboardClient onboardingCompleted={true}>
           <span data-testid="child">content</span>
         </DashboardClient>
       )
@@ -21,36 +19,27 @@ describe('DashboardClient', () => {
     expect(screen.getByTestId('child')).toBeInTheDocument()
   })
 
-  it('does not show onboarding when isFirstTime is false', async () => {
+  it('does not show onboarding when onboardingCompleted is true', async () => {
     await act(async () => {
-      render(<DashboardClient isFirstTime={false}><span /></DashboardClient>)
+      render(<DashboardClient onboardingCompleted={true}><span /></DashboardClient>)
     })
     expect(screen.queryByTestId('onboarding-modal')).not.toBeInTheDocument()
   })
 
-  it('shows onboarding when isFirstTime and not previously dismissed', async () => {
+  it('shows onboarding when onboardingCompleted is false', async () => {
     await act(async () => {
-      render(<DashboardClient isFirstTime={true}><span /></DashboardClient>)
+      render(<DashboardClient onboardingCompleted={false}><span /></DashboardClient>)
     })
     expect(screen.getByTestId('onboarding-modal')).toBeInTheDocument()
   })
 
-  it('does not show onboarding when already dismissed', async () => {
-    localStorage.setItem('onboarding_dismissed', 'true')
+  it('dismisses onboarding on complete', async () => {
     await act(async () => {
-      render(<DashboardClient isFirstTime={true}><span /></DashboardClient>)
-    })
-    expect(screen.queryByTestId('onboarding-modal')).not.toBeInTheDocument()
-  })
-
-  it('dismisses onboarding and sets localStorage on complete', async () => {
-    await act(async () => {
-      render(<DashboardClient isFirstTime={true}><span /></DashboardClient>)
+      render(<DashboardClient onboardingCompleted={false}><span /></DashboardClient>)
     })
     await act(async () => {
       screen.getByText('Complete').click()
     })
     expect(screen.queryByTestId('onboarding-modal')).not.toBeInTheDocument()
-    expect(localStorage.getItem('onboarding_dismissed')).toBe('true')
   })
 })

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
+import { rateLimit, LIMITS } from '@/lib/rate-limit'
 
 export async function GET() {
   try {
@@ -9,6 +10,9 @@ export async function GET() {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = rateLimit(user.id, 'account.export', LIMITS.EXPORT)
+    if (limited) return limited
 
     const [{ data: entries }, { data: summaries }, { data: profile }] = await Promise.all([
       supabase.from('journal_entries').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),

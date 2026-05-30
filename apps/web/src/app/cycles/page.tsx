@@ -152,7 +152,7 @@ export default function CyclesPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Start date</label>
                 <input
@@ -285,25 +285,19 @@ function CycleCard({
     <div className={`bg-white dark:bg-slate-800 border rounded-xl p-4 shadow-sm space-y-3 ${
       isArchived ? 'border-gray-100 dark:border-slate-700 opacity-70' : 'border-gray-100 dark:border-slate-700'
     }`}>
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{cycle.name}</p>
             {isArchived && (
               <span className="text-xs bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 px-2 py-0.5 rounded-full">Archived</span>
             )}
           </div>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 whitespace-nowrap">
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
             {formatDate(cycle.start_date)} – {formatDate(cycle.end_date)}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Link
-            href={`/summary?start=${cycle.start_date}&end=${cycle.end_date}`}
-            className="text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
-          >
-            Generate summary →
-          </Link>
           <button
             onClick={() => onArchive(cycle)}
             disabled={archiving === cycle.id}
@@ -319,6 +313,12 @@ function CycleCard({
           </button>
         </div>
       </div>
+      <Link
+        href={`/summary?start=${cycle.start_date}&end=${cycle.end_date}`}
+        className="inline-block text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
+      >
+        Generate summary →
+      </Link>
 
       {confirmDelete === cycle.id && (
         <div className="flex items-center gap-2 pt-1 border-t border-gray-100 dark:border-slate-700">

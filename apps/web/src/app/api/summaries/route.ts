@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidateTag, revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { sanitizeText, validateDateString, validateOptionalString, ValidationException, logValidationError } from '@/lib/validation'
+import { rateLimit, LIMITS } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,6 +13,9 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = rateLimit(user.id, 'summaries.write', LIMITS.WRITE)
+    if (limited) return limited
 
     const body = await request.json()
     const { timeframeStart, timeframeEnd, content, userInstructions } = body

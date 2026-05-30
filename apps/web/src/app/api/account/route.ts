@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/logger'
+import { rateLimit, LIMITS } from '@/lib/rate-limit'
 
 export async function DELETE() {
   try {
@@ -10,6 +11,9 @@ export async function DELETE() {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = rateLimit(user.id, 'account.delete', LIMITS.ACCOUNT)
+    if (limited) return limited
 
     // Delete user data via RLS-protected client (only deletes own rows)
     await supabase.from('journal_entries').delete().eq('user_id', user.id)

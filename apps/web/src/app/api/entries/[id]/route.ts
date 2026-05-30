@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidateTag, revalidatePath } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { sanitizeText } from '@/lib/validation'
+import { rateLimit, LIMITS } from '@/lib/rate-limit'
 
 export async function GET(
   request: Request,
@@ -16,6 +17,9 @@ export async function GET(
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = rateLimit(user.id, 'entries.read', LIMITS.READ)
+    if (limited) return limited
 
     const { data: entry, error } = await supabase
       .from('journal_entries')
@@ -49,6 +53,9 @@ export async function PATCH(
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = rateLimit(user.id, 'entries.write', LIMITS.WRITE)
+    if (limited) return limited
 
     const { content } = await request.json()
 
@@ -110,6 +117,9 @@ export async function DELETE(
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = rateLimit(user.id, 'entries.write', LIMITS.WRITE)
+    if (limited) return limited
 
     // Delete the entry (RLS will ensure user can only delete their own entries)
     const { error } = await supabase

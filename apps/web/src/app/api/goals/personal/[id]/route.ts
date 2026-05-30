@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidateTag } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { validateOptionalString, ValidationException } from '@/lib/validation'
+import { rateLimit, LIMITS } from '@/lib/rate-limit'
 
 const VALID_CATEGORIES = ['promotion', 'certification', 'skill', 'habit', 'other']
 const VALID_PRIORITIES = ['low', 'medium', 'high']
@@ -13,6 +14,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const limited = rateLimit(user.id, 'goals.personal.write', LIMITS.WRITE)
+    if (limited) return limited
 
     const { id } = await params
     const body = await request.json()
@@ -67,6 +71,9 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const limited = rateLimit(user.id, 'goals.personal.write', LIMITS.WRITE)
+    if (limited) return limited
 
     const { id } = await params
     const { error } = await supabase

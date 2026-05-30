@@ -50,7 +50,7 @@ packages/
 
 2. **Configure environment variables**
    ```bash
-   cp apps/web/.env.example apps/web/.env.local
+   cp apps/web/.env.example apps/web/..env.local
    ```
    
    Fill in `apps/web/.env.local`:

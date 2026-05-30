@@ -1,4 +1,10 @@
-import { checkRateLimit, getRateLimitInfo } from '../rate-limit'
+import { checkRateLimit, getRateLimitInfo, rateLimit, LIMITS } from '../rate-limit'
+
+jest.mock('next/server', () => ({
+  NextResponse: {
+    json: jest.fn((body, init) => ({ body, status: init?.status ?? 200, headers: init?.headers ?? {} })),
+  },
+}))
 
 describe('rate-limit', () => {
   beforeEach(() => {
@@ -127,6 +133,58 @@ describe('rate-limit', () => {
       )
 
       debugSpy.mockRestore()
+    })
+  })
+
+  describe('rateLimit', () => {
+    it('returns null when under limit', () => {
+      const result = rateLimit('user-rl-1', 'test.read', { maxRequests: 5, windowMs: 1000 })
+      expect(result).toBeNull()
+    })
+
+    it('returns 429 response when limit exceeded', () => {
+      const config = { maxRequests: 2, windowMs: 1000 }
+      rateLimit('user-rl-2', 'test.write', config)
+      rateLimit('user-rl-2', 'test.write', config)
+      const result = rateLimit('user-rl-2', 'test.write', config)
+      expect(result).not.toBeNull()
+      expect((result as any).status).toBe(429)
+    })
+
+    it('namespaces counters by routeKey so different routes are independent', () => {
+      const config = { maxRequests: 1, windowMs: 1000 }
+      expect(rateLimit('user-rl-3', 'route.a', config)).toBeNull()
+      expect(rateLimit('user-rl-3', 'route.a', config)).not.toBeNull() // route.a exhausted
+      expect(rateLimit('user-rl-3', 'route.b', config)).toBeNull()     // route.b is fresh
+    })
+
+    it('namespaces counters by userId so different users are independent', () => {
+      const config = { maxRequests: 1, windowMs: 1000 }
+      expect(rateLimit('user-rl-4', 'shared.route', config)).toBeNull()
+      expect(rateLimit('user-rl-4', 'shared.route', config)).not.toBeNull()
+      expect(rateLimit('user-rl-5', 'shared.route', config)).toBeNull() // different user
+    })
+
+    it('response includes standard rate limit headers', () => {
+      const config = { maxRequests: 1, windowMs: 1000 }
+      rateLimit('user-rl-6', 'hdr.test', config)
+      const result = rateLimit('user-rl-6', 'hdr.test', config) as any
+      expect(result?.headers?.['X-RateLimit-Limit']).toBe('1')
+      expect(result?.headers?.['X-RateLimit-Remaining']).toBe('0')
+      expect(result?.headers?.['X-RateLimit-Reset']).toBeDefined()
+      expect(result?.headers?.['Retry-After']).toBeDefined()
+    })
+  })
+
+  describe('LIMITS', () => {
+    it('exports the expected tier configs', () => {
+      expect(LIMITS.AI_PROMPTS.maxRequests).toBe(10)
+      expect(LIMITS.AI_SUMMARY.maxRequests).toBe(5)
+      expect(LIMITS.WRITE.maxRequests).toBe(20)
+      expect(LIMITS.READ.maxRequests).toBe(60)
+      expect(LIMITS.ACCOUNT.maxRequests).toBe(5)
+      expect(LIMITS.EXPORT.maxRequests).toBe(3)
+      expect(LIMITS.EXPORT.windowMs).toBe(60 * 60_000)
     })
   })
 })

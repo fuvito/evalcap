@@ -87,8 +87,8 @@ Sign Up → Daily/Weekly Check-in → AI Smart Prompts → Save Entry
 
 ### 3. Local Development
 ```bash
-cp apps/web/.env.example apps/web/.env.local
-# Fill in your keys in .env.local
+cp apps/web/.env.example apps/web/..env.local
+# Fill in your keys in ..env.local
 npm install
 npm run dev
 ```

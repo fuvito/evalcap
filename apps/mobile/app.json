@@ -33,6 +33,12 @@
       "expo-router",
       "expo-secure-store",
       [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "EvalCap uses Face ID to protect your journal entries."
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "ios": {

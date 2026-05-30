@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/nextjs'
+
 type Level = 'debug' | 'info' | 'warn' | 'error'
 
 const LEVELS: Record<Level, number> = { debug: 0, info: 1, warn: 2, error: 3 }
@@ -34,5 +36,12 @@ export const logger = {
   },
   error(msg: string, error?: unknown, category?: string) {
     if (enabled('error', category)) console.error(prefix('error', category), msg, error ?? '')
+    if (process.env.NODE_ENV === 'production') {
+      if (error instanceof Error) {
+        Sentry.captureException(error, { extra: { message: msg, category } })
+      } else {
+        Sentry.captureMessage(msg, { level: 'error', extra: { detail: error, category } })
+      }
+    }
   },
 }

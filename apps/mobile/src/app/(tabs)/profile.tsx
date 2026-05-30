@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, ActivityIndicator, Alert,
+  ScrollView, ActivityIndicator, Alert, Platform,
 } from 'react-native'
 import { useFocusEffect } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -59,6 +59,11 @@ export default function ProfileScreen() {
   }
 
   function confirmSignOut() {
+    if (Platform.OS === 'web') {
+      // Alert.alert multi-button callbacks are unreliable on web
+      if (window.confirm('Are you sure you want to sign out?')) signOut()
+      return
+    }
     Alert.alert('Sign out', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign out', style: 'destructive', onPress: signOut },

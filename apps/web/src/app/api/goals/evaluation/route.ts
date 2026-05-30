@@ -3,12 +3,16 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidateTag } from 'next/cache'
 import { logger } from '@/lib/logger'
 import { validateOptionalString, ValidationException } from '@/lib/validation'
+import { rateLimit, LIMITS } from '@/lib/rate-limit'
 
 export async function GET() {
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const limited = rateLimit(user.id, 'goals.eval.read', LIMITS.READ)
+    if (limited) return limited
 
     const { data: goals, error } = await supabase
       .from('evaluation_goals')
@@ -33,6 +37,9 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const limited = rateLimit(user.id, 'goals.eval.write', LIMITS.WRITE)
+    if (limited) return limited
 
     const body = await request.json()
     const { title, description, cycle_id, status } = body
