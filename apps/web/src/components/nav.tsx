@@ -30,6 +30,7 @@ export function Nav() {
   const accountLinks = [
     { href: '/profile', label: 'Profile' },
     { href: '/settings', label: 'Settings' },
+    { href: '/billing', label: 'Billing' },
     { href: '/account', label: 'Account' },
   ] as const
 

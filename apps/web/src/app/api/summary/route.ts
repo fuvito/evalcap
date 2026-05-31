@@ -4,6 +4,7 @@ import { generateSummary } from '@/lib/claude'
 import { logger } from '@/lib/logger'
 import { validateDateString, validateOptionalString, ValidationException, logValidationError } from '@/lib/validation'
 import { rateLimit, LIMITS } from '@/lib/rate-limit'
+import { checkSummaryLimit } from '@/lib/subscription'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +19,15 @@ export async function POST(request: NextRequest) {
 
     const limited = rateLimit(user.id, 'ai.summary', LIMITS.AI_SUMMARY)
     if (limited) return limited
+
+    const limitCheck = await checkSummaryLimit(user.id)
+    if (!limitCheck.allowed) {
+      logger.warn('Monthly summary limit reached', { userId: user.id, ...limitCheck }, 'api')
+      return NextResponse.json(
+        { error: 'Monthly summary limit reached', used: limitCheck.used, limit: limitCheck.limit, plan: limitCheck.plan },
+        { status: 429 }
+      )
+    }
 
     const body = await request.json()
     const { timeframeStart, timeframeEnd, userInstructions } = body

@@ -170,6 +170,41 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          plan: 'free' | 'pro'
+          status: 'active' | 'trialing' | 'past_due' | 'cancelled' | 'incomplete'
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          current_period_start: string | null
+          current_period_end: string | null
+          cancelled_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          plan?: 'free' | 'pro'
+          status?: 'active' | 'trialing' | 'past_due' | 'cancelled' | 'incomplete'
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          cancelled_at?: string | null
+        }
+        Update: {
+          plan?: 'free' | 'pro'
+          status?: 'active' | 'trialing' | 'past_due' | 'cancelled' | 'incomplete'
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          current_period_start?: string | null
+          current_period_end?: string | null
+          cancelled_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -193,3 +228,4 @@ export type Summary          = Database['public']['Tables']['summaries']['Row']
 export type PerformanceCycle = Database['public']['Tables']['performance_cycles']['Row']
 export type EvaluationGoal   = Database['public']['Tables']['evaluation_goals']['Row']
 export type PersonalGoal     = Database['public']['Tables']['personal_goals']['Row']
+export type Subscription     = Database['public']['Tables']['subscriptions']['Row']
