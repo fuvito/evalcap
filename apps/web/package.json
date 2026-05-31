@@ -13,7 +13,11 @@
     "test:coverage": "jest --coverage --forceExit",
     "test:ci": "jest --coverage --ci --forceExit",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "stripe:listen": "stripe listen --forward-to http://localhost:3000/api/webhooks/stripe",
+    "stripe:trigger:checkout": "stripe trigger checkout.session.completed",
+    "stripe:trigger:sub-updated": "stripe trigger customer.subscription.updated",
+    "stripe:trigger:sub-deleted": "stripe trigger customer.subscription.deleted"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.99.0",
