@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function LockScreen({ biometricType, onUnlock }: Props) {
-  const label = biometricType === 'faceid' ? 'Unlock with Face ID' : 'Unlock with Touch ID'
+  const label = biometricType === 'faceid' ? 'Unlock with Face ID' : 'Unlock with Fingerprint'
 
   function handleSignOut() {
     if (Platform.OS === 'web') {

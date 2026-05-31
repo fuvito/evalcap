@@ -53,12 +53,12 @@ export function useBiometricLock() {
   const unlock = useCallback(async (): Promise<boolean> => {
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage: 'Unlock EvalCap',
-      fallbackLabel: 'Use passcode',
+      fallbackLabel: biometricType === 'faceid' ? 'Use passcode' : 'Use PIN',
       disableDeviceFallback: false,
     })
     if (result.success) setLocked(false)
     return result.success
-  }, [])
+  }, [biometricType])
 
   return { locked, biometricType, unlock }
 }

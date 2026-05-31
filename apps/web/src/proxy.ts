@@ -62,7 +62,7 @@ export async function proxy(request: NextRequest) {
 
 const PROTECTED_PREFIXES = [
   '/dashboard', '/checkin', '/history', '/summary', '/summaries',
-  '/cycles', '/goals', '/profile', '/settings', '/account', '/admin',
+  '/cycles', '/goals', '/profile', '/settings', '/account',
 ]
 
 export const config = {

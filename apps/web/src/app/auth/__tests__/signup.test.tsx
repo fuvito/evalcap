@@ -3,13 +3,11 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import SignupPage from '@/app/auth/signup/page'
 
 const mockSignUp = jest.fn()
-const mockSignInWithOAuth = jest.fn()
 
 jest.mock('@/lib/supabase/client', () => ({
   createClient: jest.fn(() => ({
     auth: {
       signUp: (...args: unknown[]) => mockSignUp(...args),
-      signInWithOAuth: (...args: unknown[]) => mockSignInWithOAuth(...args),
     },
   })),
 }))
@@ -26,7 +24,6 @@ describe('SignupPage', () => {
     render(<SignupPage />)
     expect(screen.getByRole('heading', { name: 'Create account' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Create account' })).toBeInTheDocument()
-    expect(screen.getByText('Continue with Google')).toBeInTheDocument()
   })
 
   it('shows email confirmation state after successful signup', async () => {
@@ -61,24 +58,6 @@ describe('SignupPage', () => {
     expect(document.querySelector('input[type="password"]')).not.toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Show password' }))
     expect(document.querySelector('input[type="text"]')).not.toBeNull()
-  })
-
-  it('calls signInWithOAuth for Google sign up', async () => {
-    mockSignInWithOAuth.mockResolvedValue({ error: null })
-    render(<SignupPage />)
-    await act(async () => {
-      fireEvent.click(screen.getByText('Continue with Google'))
-    })
-    expect(mockSignInWithOAuth).toHaveBeenCalledWith(expect.objectContaining({ provider: 'google' }))
-  })
-
-  it('shows Google error when OAuth fails', async () => {
-    mockSignInWithOAuth.mockResolvedValue({ error: { message: 'Google error' } })
-    render(<SignupPage />)
-    await act(async () => {
-      fireEvent.click(screen.getByText('Continue with Google'))
-    })
-    await waitFor(() => expect(screen.getByText('Google error')).toBeInTheDocument())
   })
 
   it('shows sign in link', () => {

@@ -1,8 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
 
-// Uses service role key — only for auth user operations (e.g. deleteUser).
-// Admin panel operations live in apps/admin.
+// Uses service role key — bypasses RLS. Only use server-side.
 export function createAdminClient() {
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

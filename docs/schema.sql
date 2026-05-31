@@ -337,44 +337,55 @@ GRANT EXECUTE ON FUNCTION ensure_profile_exists(UUID, TEXT) TO authenticated;
 -- Run these after the base schema if upgrading an existing project.
 -- ─────────────────────────────────────────────────────────────
 
+-- admins — identity table for admin users (separate from profiles/role).
+-- Admin identity is determined by presence in this table, not profiles.role.
+-- More admin-specific columns will be added here over time.
+CREATE TABLE IF NOT EXISTS admins (
+  id         UUID        REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  email      TEXT        NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
+-- No user-facing RLS policy — service role access only.
+
+CREATE OR REPLACE TRIGGER admins_updated_at
+  BEFORE UPDATE ON admins
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 -- Add status to profiles (active | suspended)
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active'
   CHECK (status IN ('active', 'suspended'));
 
--- credits — per-user balance and monthly allocation
-CREATE TABLE IF NOT EXISTS credits (
-  id                  UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id             UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
-  balance             INTEGER     NOT NULL DEFAULT 0,
-  allocated_per_month INTEGER     NOT NULL DEFAULT 50,
-  updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+-- subscriptions — tracks plan and billing status per user
+-- Stripe webhook keeps this in sync; plan is 'free' | 'pro'
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id                       UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id                  UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
+  plan                     TEXT        NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'pro')),
+  status                   TEXT        NOT NULL DEFAULT 'active'
+                             CHECK (status IN ('active', 'trialing', 'past_due', 'cancelled', 'incomplete')),
+  stripe_customer_id       TEXT,
+  stripe_subscription_id   TEXT,
+  current_period_start     TIMESTAMPTZ,
+  current_period_end       TIMESTAMPTZ,
+  cancelled_at             TIMESTAMPTZ,
+  created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at               TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-ALTER TABLE credits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can view own credits" ON credits;
-CREATE POLICY "Users can view own credits"
-  ON credits FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can view own subscription" ON subscriptions;
+CREATE POLICY "Users can view own subscription"
+  ON subscriptions FOR SELECT USING (auth.uid() = user_id);
 
-GRANT SELECT ON credits TO authenticated;
+GRANT SELECT ON subscriptions TO authenticated;
 
--- credit_events — immutable ledger of credit changes
-CREATE TABLE IF NOT EXISTS credit_events (
-  id         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id    UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  admin_id   UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
-  delta      INTEGER     NOT NULL,
-  reason     TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-ALTER TABLE credit_events ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users can view own credit events" ON credit_events;
-CREATE POLICY "Users can view own credit events"
-  ON credit_events FOR SELECT USING (auth.uid() = user_id);
-
-GRANT SELECT ON credit_events TO authenticated;
+CREATE OR REPLACE TRIGGER subscriptions_updated_at
+  BEFORE UPDATE ON subscriptions
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- admin_audit_log — immutable record of every admin action
 CREATE TABLE IF NOT EXISTS admin_audit_log (

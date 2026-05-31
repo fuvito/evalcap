@@ -18,7 +18,7 @@ Access restricted to internal team via role check (`profiles.role = 'admin'`) or
 |---|---|---|
 | User list | Paginated table: email, name, job title, joined date, last active, entry count, status | MVP |
 | User search | Search by email or name | MVP |
-| User detail view | Full profile: stats, recent entries, cycles, goals, credit balance, auth events | MVP |
+| User detail view | Full profile: stats, recent entries, cycles, goals, subscription plan/status, auth events | MVP |
 | Suspend user | Block login without deleting account. Suspended users see a "account paused" message | MVP |
 | Unsuspend user | Restore access | MVP |
 | Delete user | Hard delete with confirmation — cascades all data | MVP |
@@ -28,20 +28,20 @@ Access restricted to internal team via role check (`profiles.role = 'admin'`) or
 
 ---
 
-### 2. Credits
+### 2. Subscriptions
 
-Credits gate AI usage (prompts and summaries). Each AI call costs 1 credit. Free tier gets N credits/month; paid users get more.
+Users are on a plan: `free` or `pro`. Subscriptions are managed via Stripe; the admin panel provides visibility and override capability for support workflows.
 
 | Function | Description | Priority |
 |---|---|---|
-| View credit balance | Current balance + monthly allocation for each user | MVP |
-| Add credits | Manually top up a user's balance (e.g. goodwill after outage) | MVP |
-| Deduct credits | Correct over-credited accounts | P2 |
-| Set monthly allocation | Override default free/paid tier credit limit for a specific user | P2 |
-| Credit usage history | Per-user log: timestamp, route called, credits consumed | P2 |
-| Bulk credit grant | Give N credits to all users matching a filter (e.g. all users who signed up before a date) | P3 |
+| View subscription status | Current plan, billing status, renewal date for each user | MVP |
+| Override plan | Manually set a user's plan (e.g. comping a pro account for support goodwill) | MVP |
+| Cancel subscription | Cancel on behalf of user at period end | P2 |
+| Subscription history | Log of plan changes and billing events per user | P2 |
+| Revenue overview | Active pro subscribers, MRR estimate, churn this month | P2 |
+| Bulk plan change | Set plan for a cohort of users (e.g. all beta testers → pro) | P3 |
 
-> **Note:** Requires a `credits` table (user_id, balance, allocated_per_month) and a `credit_events` log table. Schema not yet built.
+> **Note:** Requires a `subscriptions` table (user_id, plan, status, stripe_customer_id, stripe_subscription_id, current_period_end). Schema added. Stripe webhooks keep status in sync; admin overrides write directly via service role.
 
 ---
 
@@ -126,8 +126,7 @@ Admin panel features:
 |---|---|
 | `profiles.role` | Add `role` column (`'user'` \| `'admin'`), default `'user'` |
 | `profiles.status` | Add `status` column (`'active'` \| `'suspended'`), default `'active'` |
-| `credits` | `user_id, balance, allocated_per_month, updated_at` |
-| `credit_events` | `user_id, admin_id, delta, reason, created_at` |
+| `subscriptions` | `user_id, plan, status, stripe_customer_id, stripe_subscription_id, current_period_start, current_period_end, cancelled_at` |
 | `admin_notes` | `user_id, admin_id, body, created_at` |
 | `admin_audit_log` | See Audit Log section above |
 
@@ -147,8 +146,8 @@ Admin panel features:
 1. User list with search + status badge
 2. User detail view (profile + stats + recent entries)
 3. Suspend / unsuspend user
-4. Add credits
-5. View credit balance
+4. View subscription status
+5. Override plan (manual pro grant)
 6. Usage dashboard (AI calls, cost estimate)
 7. System health check
 8. Audit log (view only)
