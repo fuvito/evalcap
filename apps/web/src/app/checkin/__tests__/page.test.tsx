@@ -9,9 +9,6 @@ jest.mock('next/navigation', () => ({
 }))
 
 jest.mock('@/components/nav', () => ({ Nav: () => <nav data-testid="nav" /> }))
-jest.mock('@/components/skeleton', () => ({
-  SkeletonText: ({ className }: { className: string }) => <div className={className} data-testid="skeleton-text" />,
-}))
 
 jest.mock('@/lib/logger', () => ({
   logger: { info: jest.fn(), error: jest.fn() },
@@ -20,115 +17,122 @@ jest.mock('@/lib/logger', () => ({
 beforeEach(() => {
   jest.clearAllMocks()
   global.fetch = jest.fn() as jest.Mock
-  window.confirm = jest.fn().mockReturnValue(true)
+  // Default: all fetches succeed with empty body (covers profile load)
+  ;(global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => ({}) })
 })
 
-const mockPromptsResponse = {
-  prompts: ['What did you accomplish?', 'What are you working on?', 'Any blockers?'],
-}
+const mockPrompts = ['What did you accomplish?', 'What are you working on?', 'Any blockers?']
 
 describe('CheckInPage', () => {
-  it('shows skeleton prompts while loading', () => {
-    ;(global.fetch as jest.Mock).mockReturnValue(new Promise(() => {}))
+  it('renders the free-text textarea immediately with no loading state', () => {
     render(<CheckInPage />)
-    expect(screen.getAllByTestId('skeleton-text').length).toBeGreaterThan(0)
+    expect(screen.getByPlaceholderText(/What did you accomplish\?/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Get AI prompts' })).toBeInTheDocument()
   })
 
-  it('renders prompts after loading', async () => {
-    ;(global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => mockPromptsResponse,
-    })
-    await act(async () => { render(<CheckInPage />) })
-    await waitFor(() => expect(screen.getByText('What did you accomplish?')).toBeInTheDocument())
-    expect(screen.getByText('What are you working on?')).toBeInTheDocument()
-  })
-
-  it('uses fallback prompts when API fails', async () => {
-    ;(global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, json: async () => ({ error: 'Server error' }) })
-    await act(async () => { render(<CheckInPage />) })
-    await waitFor(() => expect(screen.getByText('What did you accomplish since your last check-in?')).toBeInTheDocument())
-  })
-
-  it('uses fallback prompts when fetch throws', async () => {
-    ;(global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'))
-    await act(async () => { render(<CheckInPage />) })
-    await waitFor(() => expect(screen.getByText('What did you accomplish since your last check-in?')).toBeInTheDocument())
-  })
-
-  it('Save button is disabled when no responses', async () => {
-    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => mockPromptsResponse })
-    await act(async () => { render(<CheckInPage />) })
-    await waitFor(() => screen.getByText('What did you accomplish?'))
+  it('Save button is disabled when textarea is empty', () => {
+    render(<CheckInPage />)
     expect(screen.getByRole('button', { name: 'Save Check-in' })).toBeDisabled()
   })
 
-  it('enables Save button after entering a response', async () => {
-    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => mockPromptsResponse })
-    await act(async () => { render(<CheckInPage />) })
-    await waitFor(() => screen.getByText('What did you accomplish?'))
-    fireEvent.change(screen.getAllByPlaceholderText('Write your response here...')[0], {
+  it('enables Save button after typing in textarea', () => {
+    render(<CheckInPage />)
+    fireEvent.change(screen.getByPlaceholderText(/What did you accomplish\?/), {
       target: { value: 'I finished the feature' },
     })
     expect(screen.getByRole('button', { name: 'Save Check-in' })).toBeEnabled()
   })
 
-  it('saves check-in and navigates to dashboard', async () => {
-    ;(global.fetch as jest.Mock)
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ profile: { default_check_in_type: 'weekly' } }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => mockPromptsResponse })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+  it('Get AI prompts button fetches and displays prompt suggestions', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ prompts: mockPrompts }),
+    })
+    render(<CheckInPage />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Get AI prompts' }))
+    })
+    await waitFor(() => expect(screen.getByText('What did you accomplish?')).toBeInTheDocument())
+    expect(screen.getByText('What are you working on?')).toBeInTheDocument()
+    expect(screen.getByText('Any blockers?')).toBeInTheDocument()
+  })
 
-    await act(async () => { render(<CheckInPage />) })
+  it('clicking a prompt appends it to the textarea and hides the prompt panel', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ prompts: mockPrompts }),
+    })
+    render(<CheckInPage />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Get AI prompts' }))
+    })
     await waitFor(() => screen.getByText('What did you accomplish?'))
-    fireEvent.change(screen.getAllByPlaceholderText('Write your response here...')[0], {
+    fireEvent.click(screen.getByText('What did you accomplish?'))
+    const textarea = screen.getByPlaceholderText(/What did you accomplish\?/) as HTMLTextAreaElement
+    expect(textarea.value).toContain('What did you accomplish?')
+    expect(screen.queryByText('What are you working on?')).not.toBeInTheDocument()
+  })
+
+  it('Dismiss button hides the prompt panel without modifying the textarea', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ prompts: mockPrompts }),
+    })
+    render(<CheckInPage />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Get AI prompts' }))
+    })
+    await waitFor(() => screen.getByText('What did you accomplish?'))
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+    expect(screen.queryByText('What did you accomplish?')).not.toBeInTheDocument()
+    const textarea = screen.getByPlaceholderText(/What did you accomplish\?/) as HTMLTextAreaElement
+    expect(textarea.value).toBe('')
+  })
+
+  it('saves check-in with raw content and navigates to dashboard', async () => {
+    render(<CheckInPage />)
+    fireEvent.change(screen.getByPlaceholderText(/What did you accomplish\?/), {
       target: { value: 'I shipped a feature' },
     })
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Save Check-in' }))
     })
     await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/dashboard'))
+    const saveCall = (global.fetch as jest.Mock).mock.calls.find(
+      ([url]: [string]) => url === '/api/entries'
+    )
+    expect(saveCall).toBeDefined()
+    const body = JSON.parse(saveCall[1].body)
+    expect(body.content).toBe('I shipped a feature')
   })
 
-  it('switches check-in type without confirm when no responses', async () => {
-    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => mockPromptsResponse })
-    await act(async () => { render(<CheckInPage />) })
-    await waitFor(() => screen.getByText('What did you accomplish?'))
+  it('switching check-in type updates the active button', () => {
+    render(<CheckInPage />)
     fireEvent.click(screen.getByRole('button', { name: 'daily' }))
-    expect(window.confirm).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'daily' })).toHaveClass('bg-brand-600')
+    expect(screen.getByRole('button', { name: 'weekly' })).not.toHaveClass('bg-brand-600')
   })
 
-  it('asks confirm before switching type when responses exist', async () => {
-    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => mockPromptsResponse })
-    await act(async () => { render(<CheckInPage />) })
-    await waitFor(() => screen.getByText('What did you accomplish?'))
-    fireEvent.change(screen.getAllByPlaceholderText('Write your response here...')[0], {
-      target: { value: 'Something' },
+  it('applies profile default check-in type on load', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ profile: { default_check_in_type: 'daily' } }),
     })
-    fireEvent.click(screen.getByRole('button', { name: 'daily' }))
-    expect(window.confirm).toHaveBeenCalled()
+    await act(async () => { render(<CheckInPage />) })
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'daily' })).toHaveClass('bg-brand-600')
+    )
   })
 
-  it('cancels switch when user declines confirm', async () => {
-    ;(window.confirm as jest.Mock).mockReturnValue(false)
-    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => mockPromptsResponse })
-    await act(async () => { render(<CheckInPage />) })
-    await waitFor(() => screen.getByText('What did you accomplish?'))
-    fireEvent.change(screen.getAllByPlaceholderText('Write your response here...')[0], {
-      target: { value: 'Something' },
+  it('does not show prompts panel when API returns no prompts', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ prompts: [] }),
     })
-    fireEvent.click(screen.getByRole('button', { name: 'daily' }))
-    // still on weekly
-    expect(screen.getByRole('button', { name: 'weekly' })).toHaveClass('bg-brand-600')
-  })
-
-  it('Refresh Prompts button reloads prompts', async () => {
-    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => mockPromptsResponse })
-    await act(async () => { render(<CheckInPage />) })
-    await waitFor(() => screen.getByText('What did you accomplish?'))
+    render(<CheckInPage />)
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Refresh prompts' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Get AI prompts' }))
     })
-    expect(global.fetch).toHaveBeenCalledWith('/api/prompts', expect.any(Object))
+    expect(screen.queryByText('Prompts — click one to add it')).not.toBeInTheDocument()
   })
 })

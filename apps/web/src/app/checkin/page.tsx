@@ -4,70 +4,33 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Nav } from '@/components/nav'
 import { logger } from '@/lib/logger'
-import { SkeletonText } from '@/components/skeleton'
 
 export default function CheckInPage() {
   const router = useRouter()
-
   const [checkInType, setCheckInType] = useState<'daily' | 'weekly'>('weekly')
+  const [content, setContent] = useState('')
   const [prompts, setPrompts] = useState<string[]>([])
-  const [responses, setResponses] = useState<Record<number, string>>({})
-  const [loading, setLoading] = useState(false)
-  const [loadingPrompts, setLoadingPrompts] = useState(true)
+  const [loadingPrompts, setLoadingPrompts] = useState(false)
   const [saving, setSaving] = useState(false)
-  const initializedRef = useRef(false)
+  const [promptUsed, setPromptUsed] = useState<string | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Load default check-in type and initial prompts on mount only
   useEffect(() => {
-    const initializePage = async () => {
+    async function loadProfile() {
       try {
         const res = await fetch('/api/profile')
         const data = await res.json()
-
-        if (res.ok && data.profile?.default_check_in_type) {
+        if (data.profile?.default_check_in_type) {
           setCheckInType(data.profile.default_check_in_type)
         }
-      } catch (err) {
-        // Profile load is optional, continue with default check-in type
+      } catch {
+        // profile default is optional
       }
-
-      await loadPrompts()
-      initializedRef.current = true
     }
-
-    if (!initializedRef.current) {
-      initializePage()
-    }
-
-    return () => {}
+    loadProfile()
   }, [])
 
-  const FALLBACK_PROMPTS = [
-    'What did you accomplish since your last check-in?',
-    'What are you currently working on?',
-    'Any blockers or upcoming plans to note?',
-  ]
-
-  function handleCheckInTypeChange(newType: 'daily' | 'weekly') {
-    if (hasResponses) {
-      if (!window.confirm('Changing the check-in type will delete your current answers. Continue?')) {
-        return
-      }
-    }
-    setCheckInType(newType)
-    // Note: We don't regenerate prompts when type changes, user must click Refresh Prompts
-  }
-
-  function handleRefreshPrompts() {
-    if (hasResponses) {
-      if (!window.confirm('Refreshing prompts will delete all your current answers. Continue?')) {
-        return
-      }
-    }
-    loadPrompts()
-  }
-
-  async function loadPrompts() {
+  async function handleGetPrompts() {
     setLoadingPrompts(true)
     try {
       const res = await fetch('/api/prompts', {
@@ -76,35 +39,33 @@ export default function CheckInPage() {
         body: JSON.stringify({ checkInType }),
       })
       const data = await res.json()
-      if (!res.ok) {
-        logger.error('/api/prompts returned error', data.detail ?? data.error, 'checkin')
-        setPrompts(FALLBACK_PROMPTS)
+      if (res.ok) {
+        setPrompts(data.prompts || [])
       } else {
-        setPrompts(data.prompts || FALLBACK_PROMPTS)
+        logger.error('/api/prompts returned error', data.detail ?? data.error, 'checkin')
       }
-      setResponses({})
     } catch (err) {
       logger.error('/api/prompts fetch failed', err, 'checkin')
-      setPrompts(FALLBACK_PROMPTS)
     } finally {
       setLoadingPrompts(false)
     }
   }
 
+  function applyPrompt(prompt: string) {
+    setContent(prev => prev.trim() ? `${prev}\n\n${prompt}\n` : `${prompt}\n`)
+    setPromptUsed(prompt)
+    setPrompts([])
+    textareaRef.current?.focus()
+  }
+
   async function handleSave() {
-    const combinedContent = prompts
-      .map((prompt, i) => `Q: ${prompt}\nA: ${responses[i] || ''}`)
-      .filter((_, i) => responses[i]?.trim())
-      .join('\n\n')
-
-    if (!combinedContent.trim()) return
-
+    if (!content.trim()) return
     setSaving(true)
     try {
       const res = await fetch('/api/entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: combinedContent, checkInType, promptUsed: prompts.join(' | ') }),
+        body: JSON.stringify({ content: content.trim(), checkInType, promptUsed }),
       })
       if (!res.ok) throw new Error('Failed to save')
       router.push('/dashboard')
@@ -115,77 +76,82 @@ export default function CheckInPage() {
     }
   }
 
-  const hasResponses = Object.values(responses).some(r => r.trim().length > 0)
-
   return (
     <>
       <Nav />
-    <div className="max-w-5xl mx-auto px-4 md:px-8 py-8 space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">New Check-in</h1>
-        <div className="flex gap-2">
-          {(['daily', 'weekly'] as const).map(type => (
-            <button
-              key={type}
-              onClick={() => handleCheckInTypeChange(type)}
-              className={`px-4 py-2 rounded-full text-sm font-medium capitalize transition-colors ${
-                checkInType === type
-                  ? 'bg-brand-600 text-white'
-                  : 'border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'
-              }`}
-            >
-              {type}
-            </button>
-          ))}
+      <div className="max-w-2xl mx-auto px-4 md:px-8 py-8 space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">New Check-in</h1>
+          <div className="flex gap-2">
+            {(['daily', 'weekly'] as const).map(type => (
+              <button
+                key={type}
+                onClick={() => setCheckInType(type)}
+                className={`px-4 py-2 rounded-full text-sm font-medium capitalize transition-colors ${
+                  checkInType === type
+                    ? 'bg-brand-600 text-white'
+                    : 'border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+          <textarea
+            ref={textareaRef}
+            value={content}
+            onChange={e => setContent(e.target.value)}
+            placeholder="What did you accomplish? What are you working on? Any blockers or plans to note?"
+            rows={10}
+            className="w-full p-5 text-sm text-gray-800 dark:text-slate-200 bg-transparent placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none resize-none"
+          />
+        </div>
+
+        {prompts.length > 0 && (
+          <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-4 shadow-sm space-y-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                Prompts — click one to add it
+              </span>
+              <button
+                onClick={() => setPrompts([])}
+                className="text-xs text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+              >
+                Dismiss
+              </button>
+            </div>
+            {prompts.map((p, i) => (
+              <button
+                key={i}
+                onClick={() => applyPrompt(p)}
+                className="w-full text-left text-sm text-slate-700 dark:text-slate-300 px-3 py-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border border-gray-100 dark:border-slate-600"
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleSave}
+            disabled={!content.trim() || saving}
+            className="flex-1 py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
+          >
+            {saving ? 'Saving...' : 'Save Check-in'}
+          </button>
+          <button
+            onClick={handleGetPrompts}
+            disabled={loadingPrompts}
+            className="px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-lg text-gray-500 dark:text-slate-400 font-medium hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
+          >
+            {loadingPrompts ? 'Loading...' : 'Get AI prompts'}
+          </button>
         </div>
       </div>
-
-      {loadingPrompts ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="space-y-2">
-              <SkeletonText className="h-5 w-3/4" />
-              <SkeletonText className="h-24 w-full" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-5">
-          {prompts.map((prompt, i) => (
-            <div key={i} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-5 shadow-sm space-y-3">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-                {prompt}
-              </label>
-              <textarea
-                value={responses[i] || ''}
-                onChange={e => setResponses(prev => ({ ...prev, [i]: e.target.value }))}
-                placeholder="Write your response here..."
-                rows={4}
-                className="w-full border border-gray-200 dark:border-slate-600 rounded-lg p-3 text-sm text-gray-800 dark:text-slate-200 bg-gray-50 dark:bg-slate-700 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-slate-600 transition-colors resize-none"
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="flex gap-3 pt-2">
-        <button
-          onClick={handleSave}
-          disabled={!hasResponses || saving}
-          className="flex-1 py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
-        >
-          {saving ? 'Saving...' : 'Save Check-in'}
-        </button>
-        <button
-          onClick={handleRefreshPrompts}
-          disabled={loadingPrompts}
-          className="px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-lg text-gray-500 dark:text-slate-400 font-medium hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
-          title="Refreshing will delete your current answers"
-        >
-          Refresh prompts
-        </button>
-      </div>
-    </div>
     </>
   )
 }
