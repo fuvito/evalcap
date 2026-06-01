@@ -160,6 +160,12 @@ This document tracks remaining work to polish, harden, and extend the product.
 - [x] Component tests: skeleton, cookie-banner, nav, onboarding-modal, theme-provider, error
 - [x] `lib/fetcher.ts`, `proxy.ts`, `auth/callback` route tests
 
+### Sentry (code is in place, needs enabling)
+- [ ] Create Sentry project and get DSN
+- [ ] Add `NEXT_PUBLIC_SENTRY_DSN` to Vercel env vars (production)
+- [ ] Verify errors appear in Sentry dashboard (trigger a test error in production mode)
+- [ ] Optionally: change logger.ts guard from `NODE_ENV === 'production'` to `!!NEXT_PUBLIC_SENTRY_DSN` to capture errors in staging too
+
 ### Integrations (Future)
 - [ ] Calendar sync, Jira/Linear, Slack, PDF export
 - **Est**: 15+ hours
