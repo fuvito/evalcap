@@ -41,12 +41,6 @@ export default async function BillingPage({
       })
     : null
 
-  logger.debug('Billing page Stripe data', {
-    subId: sub?.stripe_subscription_id ?? null,
-    stripeStatus: stripeSub?.status ?? null,
-    cancelAtPeriodEnd: stripeSub?.cancel_at_period_end ?? null,
-    cancelAt: stripeSub?.cancel_at ?? null,
-  }, 'billing')
 
   const isActive = stripeSub
     ? stripeSub.status === 'active' || stripeSub.status === 'trialing'
