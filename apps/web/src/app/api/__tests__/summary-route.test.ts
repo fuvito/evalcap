@@ -4,16 +4,19 @@ import { makeSupabase, jsonRequest, bearerRequest } from './helpers'
 jest.mock('@/lib/supabase/server')
 jest.mock('@/lib/claude')
 jest.mock('@/lib/rate-limit')
+jest.mock('@/lib/subscription')
 jest.mock('@anthropic-ai/sdk', () => ({ __esModule: true, default: jest.fn() }))
 
 import { createClient, createClientFromToken } from '@/lib/supabase/server'
 import { generateSummary } from '@/lib/claude'
 import { rateLimit } from '@/lib/rate-limit'
+import { checkSummaryLimit } from '@/lib/subscription'
 
 const mockCreateClient = createClient as jest.Mock
 const mockCreateClientFromToken = createClientFromToken as jest.Mock
 const mockGenerateSummary = generateSummary as jest.Mock
 const mockRateLimit = rateLimit as jest.Mock
+const mockCheckSummaryLimit = checkSummaryLimit as jest.Mock
 
 const AUTHED_USER = { id: 'user-1', email: 'test@example.com' }
 const ENTRIES = [
@@ -23,6 +26,7 @@ const ENTRIES = [
 
 beforeEach(() => {
   mockRateLimit.mockReturnValue(null)
+  mockCheckSummaryLimit.mockResolvedValue({ allowed: true, used: 0, limit: 1, plan: 'free' })
   mockGenerateSummary.mockResolvedValue('This is my performance summary.')
 })
 

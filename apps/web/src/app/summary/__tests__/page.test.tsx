@@ -6,6 +6,12 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => ({ get: () => null }),
 }))
 
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({ href, children, ...rest }: { href: string; children: React.ReactNode; [key: string]: unknown }) =>
+    <a href={href} {...rest}>{children}</a>,
+}))
+
 jest.mock('@/components/nav', () => ({ Nav: () => <nav data-testid="nav" /> }))
 jest.mock('@/components/skeleton', () => ({
   SkeletonText: ({ className }: { className: string }) => <div className={className} data-testid="skeleton-text" />,

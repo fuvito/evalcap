@@ -27,20 +27,24 @@ beforeEach(() => {
   mockSignOut.mockResolvedValue({})
   jest.clearAllMocks()
   mockSignOut.mockResolvedValue({})
+  // Stub global fetch so useEffect in Nav doesn't throw "fetch is not defined"
+  global.fetch = jest.fn().mockResolvedValue({ ok: false, json: jest.fn() }) as jest.Mock
 })
 
 describe('Nav', () => {
   it('renders primary nav links', () => {
     render(<Nav />)
     expect(screen.getAllByText('Dashboard').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Check-in').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('History').length).toBeGreaterThan(0)
+    // Check-in and History are inside a collapsed dropdown group — the group trigger is visible
+    // but the individual items are only shown when expanded. Verify the group label is present.
+    expect(screen.getAllByText('Journal').length).toBeGreaterThan(0)
   })
 
-  it('renders account links', () => {
+  it('renders account dropdown trigger', () => {
     render(<Nav />)
-    expect(screen.getAllByText('Profile').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Settings').length).toBeGreaterThan(0)
+    // Profile and Settings are inside the Account dropdown (collapsed by default).
+    // The dropdown trigger button for Account should be visible.
+    expect(screen.getAllByText('Account').length).toBeGreaterThan(0)
   })
 
   it('renders EvalCap brand link', () => {
