@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getLimits, getSubscription } from '@/lib/subscription'
 import { stripe } from '@/lib/stripe'
+import { logger } from '@/lib/logger'
 import { BillingActions } from './billing-actions'
 import { Nav } from '@/components/nav'
 
@@ -34,17 +35,32 @@ export default async function BillingPage({
 
   // Fetch live data from Stripe so billing page is always accurate regardless of webhook sync
   const stripeSub = sub?.stripe_subscription_id
-    ? await stripe.subscriptions.retrieve(sub.stripe_subscription_id).catch(() => null)
+    ? await stripe.subscriptions.retrieve(sub.stripe_subscription_id).catch((err) => {
+        logger.error('Failed to retrieve Stripe subscription on billing page', err, 'billing')
+        return null
+      })
     : null
+
+  logger.debug('Billing page Stripe data', {
+    subId: sub?.stripe_subscription_id ?? null,
+    stripeStatus: stripeSub?.status ?? null,
+    cancelAtPeriodEnd: stripeSub?.cancel_at_period_end ?? null,
+    cancelAt: stripeSub?.cancel_at ?? null,
+  }, 'billing')
 
   const isActive = stripeSub
     ? stripeSub.status === 'active' || stripeSub.status === 'trialing'
     : sub?.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing')
 
+  // cancel_at_period_end = portal "cancel at period end" toggle
+  // cancel_at = portal cancellation flow sets a specific future timestamp instead
   const cancelAtPeriodEnd = stripeSub?.cancel_at_period_end ?? false
+  const cancelAt = stripeSub?.cancel_at ? new Date(stripeSub.cancel_at * 1000).toISOString() : null
+  const isCancellationPending = cancelAtPeriodEnd || cancelAt !== null
   const currentPeriodEnd = stripeSub
     ? new Date(stripeSub.items.data[0]!.current_period_end * 1000).toISOString()
     : sub?.current_period_end ?? null
+  const cancellationDate = cancelAtPeriodEnd ? currentPeriodEnd : (cancelAt ?? currentPeriodEnd)
 
   const limits = getLimits()
   const plan: 'free' | 'pro' = isActive ? 'pro' : 'free'
@@ -83,9 +99,9 @@ export default async function BillingPage({
         </div>
 
         {isPro && currentPeriodEnd && (
-          <p className={`text-xs mb-4 ${cancelAtPeriodEnd ? 'text-amber-500' : 'text-slate-400'}`}>
-            {cancelAtPeriodEnd
-              ? `Cancels on ${fmtDate(currentPeriodEnd)} — Pro access until then`
+          <p className={`text-xs mb-4 ${isCancellationPending ? 'text-amber-500' : 'text-slate-400'}`}>
+            {isCancellationPending
+              ? `Cancels on ${fmtDate(cancellationDate!)} — Pro access until then`
               : `Renews ${fmtDate(currentPeriodEnd)}`}
           </p>
         )}
