@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getUserPlan } from '@/lib/subscription'
+import { checkSummaryLimit } from '@/lib/subscription'
 
 export async function GET() {
   const supabase = await createClient()
@@ -9,6 +9,6 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const plan = await getUserPlan(user.id)
-  return NextResponse.json({ plan })
+  const { plan, used, limit } = await checkSummaryLimit(user.id)
+  return NextResponse.json({ plan, used, limit })
 }

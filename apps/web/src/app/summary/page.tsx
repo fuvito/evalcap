@@ -2,11 +2,14 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Nav } from '@/components/nav'
 import { SkeletonText } from '@/components/skeleton'
 import { fetcher } from '@/lib/fetcher'
 import type { PerformanceCycle } from '@/types/database'
+
+type PlanData = { plan: 'free' | 'pro'; used: number; limit: number }
 
 export default function SummaryPage() {
   const params = useSearchParams()
@@ -20,7 +23,11 @@ export default function SummaryPage() {
   const [error, setError] = useState('')
 
   const { data: cyclesData } = useSWR<{ cycles: PerformanceCycle[] }>('/api/cycles', fetcher)
+  const { data: planData, mutate: mutatePlan } = useSWR<PlanData>('/api/plan', fetcher)
   const cycles = (cyclesData?.cycles ?? []).filter(c => c.status === 'active')
+
+  const atLimit = planData ? planData.used >= planData.limit : false
+  const isPro = planData?.plan === 'pro'
 
   async function handleGenerate() {
     if (!timeframeStart || !timeframeEnd) return
@@ -39,12 +46,18 @@ export default function SummaryPage() {
 
       const data = await res.json()
 
+      if (res.status === 429 && data.plan === 'free') {
+        setError('limit_reached')
+        return
+      }
+
       if (!res.ok) {
         setError(data.error || 'Failed to generate summary')
         return
       }
 
       setSummary(data.summary)
+      mutatePlan()
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {
@@ -150,20 +163,50 @@ export default function SummaryPage() {
             />
           </div>
 
+          {!isPro && planData && (
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span>Summaries this month</span>
+                <span className={atLimit ? 'text-red-500 font-semibold' : ''}>
+                  {planData.used} / {planData.limit}
+                </span>
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
+                <div
+                  className={`h-1.5 rounded-full transition-all ${atLimit ? 'bg-red-400' : 'bg-brand-500'}`}
+                  style={{ width: `${Math.min(100, (planData.used / planData.limit) * 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <button
             onClick={handleGenerate}
-            disabled={!timeframeStart || !timeframeEnd || loading}
+            disabled={!timeframeStart || !timeframeEnd || loading || atLimit}
             className="w-full py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
           >
             {loading ? 'Generating...' : 'Generate Summary'}
           </button>
         </div>
 
-        {error && (
+        {error === 'limit_reached' ? (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-5">
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-1">Monthly limit reached</p>
+            <p className="text-sm text-amber-700 dark:text-amber-300 mb-4">
+              You&apos;ve used your {planData?.limit} free summary this month. Upgrade to Pro for {planData ? 50 : 'unlimited'} summaries per month.
+            </p>
+            <Link
+              href="/billing"
+              className="inline-block px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-lg text-sm font-medium transition-colors"
+            >
+              Upgrade to Pro →
+            </Link>
+          </div>
+        ) : error ? (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl p-4">
             <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
           </div>
-        )}
+        ) : null}
 
         {loading && (
           <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-5 shadow-sm space-y-3">
