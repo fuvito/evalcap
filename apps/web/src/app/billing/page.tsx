@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getLimits, getSubscription } from '@/lib/subscription'
+import { stripe } from '@/lib/stripe'
 import { BillingActions } from './billing-actions'
 import { Nav } from '@/components/nav'
 
@@ -31,12 +32,22 @@ export default async function BillingPage({
       .gte('created_at', startOfMonth),
   ])
 
-  const plan: 'free' | 'pro' =
-    sub?.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing')
-      ? 'pro'
-      : 'free'
+  // Fetch live data from Stripe so billing page is always accurate regardless of webhook sync
+  const stripeSub = sub?.stripe_subscription_id
+    ? await stripe.subscriptions.retrieve(sub.stripe_subscription_id).catch(() => null)
+    : null
+
+  const isActive = stripeSub
+    ? stripeSub.status === 'active' || stripeSub.status === 'trialing'
+    : sub?.plan === 'pro' && (sub.status === 'active' || sub.status === 'trialing')
+
+  const cancelAtPeriodEnd = stripeSub?.cancel_at_period_end ?? false
+  const currentPeriodEnd = stripeSub
+    ? new Date(stripeSub.items.data[0]!.current_period_end * 1000).toISOString()
+    : sub?.current_period_end ?? null
 
   const limits = getLimits()
+  const plan: 'free' | 'pro' = isActive ? 'pro' : 'free'
   const limit = plan === 'pro' ? limits.proSummaryLimit : limits.freeSummaryLimit
   const used = summariesThisMonth ?? 0
   const isPro = plan === 'pro'
@@ -71,11 +82,11 @@ export default async function BillingPage({
           </span>
         </div>
 
-        {isPro && sub?.current_period_end && (
-          <p className={`text-xs mb-4 ${sub.cancel_at_period_end ? 'text-amber-500' : 'text-slate-400'}`}>
-            {sub.cancel_at_period_end
-              ? `Cancels on ${fmtDate(sub.current_period_end)} — Pro access until then`
-              : `Renews ${fmtDate(sub.current_period_end)}`}
+        {isPro && currentPeriodEnd && (
+          <p className={`text-xs mb-4 ${cancelAtPeriodEnd ? 'text-amber-500' : 'text-slate-400'}`}>
+            {cancelAtPeriodEnd
+              ? `Cancels on ${fmtDate(currentPeriodEnd)} — Pro access until then`
+              : `Renews ${fmtDate(currentPeriodEnd)}`}
           </p>
         )}
 
