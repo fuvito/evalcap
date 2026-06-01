@@ -113,7 +113,15 @@ export function Nav() {
   const supabase = createClient()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [plan, setPlan] = useState<'free' | 'pro' | null>(null)
   const navRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetch('/api/plan')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.plan) setPlan(data.plan) })
+      .catch(() => {})
+  }, [])
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -182,6 +190,16 @@ export function Nav() {
 
         {/* Desktop account dropdown + sign out */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
+          {plan === 'pro' && (
+            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-400">
+              Pro
+            </span>
+          )}
+          {plan === 'free' && (
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+              Free
+            </span>
+          )}
           <DropdownMenu
             label="Account"
             items={ACCOUNT_ITEMS}
@@ -216,6 +234,17 @@ export function Nav() {
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900">
           <nav className="p-4 space-y-4">
+            {plan && (
+              <div className="flex items-center gap-2 px-4 pb-1">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  plan === 'pro'
+                    ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-400'
+                    : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                }`}>
+                  {plan === 'pro' ? 'Pro' : 'Free'}
+                </span>
+              </div>
+            )}
             <Link
               href="/dashboard"
               onClick={() => setMobileOpen(false)}

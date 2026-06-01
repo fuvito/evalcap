@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getLimits, getSubscription } from '@/lib/subscription'
 import { BillingActions } from './billing-actions'
+import { Nav } from '@/components/nav'
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -40,13 +42,18 @@ export default async function BillingPage({
   const isPro = plan === 'pro'
 
   return (
+    <>
+    <Nav />
     <div className="max-w-xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-semibold text-slate-800 mb-1">Billing</h1>
       <p className="text-sm text-slate-500 mb-8">Manage your EvalCap subscription.</p>
 
       {success === '1' && (
-        <div className="mb-6 px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-          You&apos;re now on the Pro plan. Thank you!
+        <div className="mb-6 px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 flex items-center justify-between gap-4">
+          <span>You&apos;re now on the Pro plan. Thank you!</span>
+          <Link href="/dashboard" className="flex-shrink-0 font-medium underline underline-offset-2 hover:text-green-900">
+            Go to dashboard →
+          </Link>
         </div>
       )}
 
@@ -111,5 +118,6 @@ export default async function BillingPage({
         ))}
       </div>
     </div>
+    </>
   )
 }
