@@ -180,6 +180,7 @@ export type Database = {
           stripe_subscription_id: string | null
           current_period_start: string | null
           current_period_end: string | null
+          cancel_at_period_end: boolean
           cancelled_at: string | null
           created_at: string
           updated_at: string
@@ -192,6 +193,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           current_period_start?: string | null
           current_period_end?: string | null
+          cancel_at_period_end?: boolean
           cancelled_at?: string | null
         }
         Update: {
@@ -201,6 +203,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           current_period_start?: string | null
           current_period_end?: string | null
+          cancel_at_period_end?: boolean
           cancelled_at?: string | null
         }
         Relationships: []

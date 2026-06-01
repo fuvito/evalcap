@@ -72,8 +72,10 @@ export default async function BillingPage({
         </div>
 
         {isPro && sub?.current_period_end && (
-          <p className="text-xs text-slate-400 mb-4">
-            Renews {fmtDate(sub.current_period_end)}
+          <p className={`text-xs mb-4 ${sub.cancel_at_period_end ? 'text-amber-500' : 'text-slate-400'}`}>
+            {sub.cancel_at_period_end
+              ? `Cancels on ${fmtDate(sub.current_period_end)} — Pro access until then`
+              : `Renews ${fmtDate(sub.current_period_end)}`}
           </p>
         )}
 

@@ -370,6 +370,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   stripe_subscription_id   TEXT,
   current_period_start     TIMESTAMPTZ,
   current_period_end       TIMESTAMPTZ,
+  cancel_at_period_end     BOOLEAN     NOT NULL DEFAULT FALSE,
   cancelled_at             TIMESTAMPTZ,
   created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at               TIMESTAMPTZ NOT NULL DEFAULT NOW()
